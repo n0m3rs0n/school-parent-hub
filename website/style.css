@@ -39,6 +39,10 @@
 html, body {
   margin: 0;
   padding: 0;
+  /* Safety net: content (e.g. a long URL from an email body) that slips
+     past a component's own wrapping rules scrolls within itself instead
+     of stretching the whole page and breaking mobile layout. */
+  overflow-x: hidden;
 }
 
 body {
@@ -203,6 +207,11 @@ img {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Grid items default to min-width: auto, so a long unbroken word or URL
+     in an email body would otherwise force the card (and the whole page)
+     wider than the viewport instead of wrapping. */
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .card-header {
@@ -297,6 +306,7 @@ img {
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
+  overflow-wrap: break-word;
   padding: 28px;
   position: relative;
 }
@@ -375,8 +385,11 @@ img {
   width: 100%;
   border-collapse: collapse;
   margin: 0 0 12px;
-  display: block;
-  overflow-x: auto;
+  /* Fixed layout makes columns share the table's own width instead of
+     expanding to fit their content — needed because some emails (e.g.
+     calendar invites) use deeply nested layout tables whose cells would
+     otherwise refuse to wrap and force the modal to overflow. */
+  table-layout: fixed;
 }
 
 .modal-body.is-rich th,
@@ -384,6 +397,7 @@ img {
   border: 1px solid var(--color-border);
   padding: 6px 10px;
   text-align: left;
+  overflow-wrap: break-word;
 }
 
 .modal-body.is-rich hr {
