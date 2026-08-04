@@ -197,6 +197,78 @@ const Render = {
     return div.innerHTML;
   },
 
+  /**
+   * Builds the attachments block for the Read More modal: an inline
+   * image or embedded PDF preview when the API provides one, otherwise
+   * just a filename (linked to Drive if a viewUrl is available).
+   */
+  attachments(attachmentList) {
+    const container = document.createElement('div');
+
+    const label = document.createElement('strong');
+    label.textContent = 'Attachments';
+    container.appendChild(label);
+
+    const list = document.createElement('div');
+    list.className = 'attachment-list';
+    attachmentList.forEach((attachment) => {
+      list.appendChild(Render.attachmentItem(attachment));
+    });
+    container.appendChild(list);
+
+    return container;
+  },
+
+  /** Builds a single attachment's preview + filename link. */
+  attachmentItem(attachment) {
+    const item = document.createElement('div');
+    item.className = 'attachment-item';
+
+    const mimeType = attachment.mimeType || '';
+    const isImage = mimeType.indexOf('image/') === 0;
+    const isPdf = mimeType === 'application/pdf';
+
+    if (isImage && attachment.previewUrl) {
+      const link = document.createElement('a');
+      link.href = attachment.viewUrl || attachment.previewUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      const img = document.createElement('img');
+      img.src = attachment.previewUrl;
+      img.alt = attachment.name || 'Attachment image';
+      img.className = 'attachment-image-preview';
+      img.loading = 'lazy';
+
+      link.appendChild(img);
+      item.appendChild(link);
+    } else if (isPdf && attachment.previewUrl) {
+      const iframe = document.createElement('iframe');
+      iframe.src = attachment.previewUrl;
+      iframe.className = 'attachment-pdf-preview';
+      iframe.loading = 'lazy';
+      iframe.title = attachment.name || 'PDF preview';
+      item.appendChild(iframe);
+    }
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'attachment-name-row';
+
+    if (attachment.viewUrl) {
+      const nameLink = document.createElement('a');
+      nameLink.href = attachment.viewUrl;
+      nameLink.target = '_blank';
+      nameLink.rel = 'noopener noreferrer';
+      nameLink.textContent = attachment.name;
+      nameRow.appendChild(nameLink);
+    } else {
+      nameRow.textContent = attachment.name;
+    }
+
+    item.appendChild(nameRow);
+    return item;
+  },
+
   showLoading() {
     dom.loading.hidden = false;
     dom.errorMessage.hidden = true;
@@ -408,10 +480,7 @@ const Modal = {
 
     dom.modalAttachments.innerHTML = '';
     if (item.attachments && item.attachments.length > 0) {
-      const label = document.createElement('strong');
-      label.textContent = 'Attachments: ';
-      dom.modalAttachments.appendChild(label);
-      dom.modalAttachments.appendChild(document.createTextNode(item.attachments.join(', ')));
+      dom.modalAttachments.appendChild(Render.attachments(item.attachments));
     }
 
     dom.modalOverlay.hidden = false;

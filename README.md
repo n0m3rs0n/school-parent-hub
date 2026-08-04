@@ -237,16 +237,21 @@ without major rewrites.
   per page with Prev/Next controls (`Pagination` module in `app.js`).
   Search and category filtering still run across the full fetched dataset —
   only rendering is paginated, so results stay accurate across pages.
-- ✅ Inline image hosting (partial "Attachment uploads to Google Drive"):
-  inline email images (e.g. letterhead logos) are uploaded to a shared
-  Drive folder at import time and shown inline in the "Read More" modal —
-  see `resolveInlineImages_` in `Code.gs` and the setup note in
-  [Section 3.2](#32-authorize-gmail-and-drive-access). Regular file
-  attachments (PDFs, etc.) are still just listed by name, not previewed —
-  that's covered by "PDF preview / image preview" below.
+- ✅ Inline image hosting ("Attachment uploads to Google Drive"): inline
+  email images (e.g. letterhead logos) are uploaded to a shared Drive
+  folder at import time and shown inline in the "Read More" modal — see
+  `resolveInlineImages_` in `Code.gs` and the setup note in
+  [Section 3.2](#32-authorize-gmail-and-drive-access).
+- ✅ PDF / image attachment preview: real file attachments (not inline
+  images) are also uploaded to Drive (`uploadAttachmentsToDrive_` in
+  `Code.gs`). Images render as an inline thumbnail and PDFs as an
+  embedded preview, right in the "Read More" modal — no download
+  required. Other file types (.docx, .xlsx, etc.) still just show the
+  filename, now linked to an "open in Drive" view instead of being
+  inert text. Rows imported before this shipped keep showing plain
+  filenames with no preview — delete and let a row re-import to upgrade it.
 
 **Phase 2 — Not Yet Built**
-- PDF preview / image preview (for actual file attachments, not inline images)
 - Dark mode
 - Monthly archive view
 - Print announcement

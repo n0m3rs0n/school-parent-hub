@@ -75,12 +75,19 @@ const CONFIG = {
   // reference only resolves inside Gmail, not in a browser. Files here
   // are shared "anyone with the link can view", matching the fact that
   // everything imported is already a public school announcement.
-  INLINE_IMAGE_FOLDER_NAME: 'School Parent Hub - Inline Images'
+  INLINE_IMAGE_FOLDER_NAME: 'School Parent Hub - Inline Images',
+
+  // Drive folder for real file attachments (PDFs, images, etc. — not
+  // inline email images), uploaded so the website can preview them
+  // instead of just listing a filename. Same public sharing rationale
+  // as INLINE_IMAGE_FOLDER_NAME above.
+  ATTACHMENT_FOLDER_NAME: 'School Parent Hub - Attachments'
 };
 
-// Script Properties key used to cache the inline-image Drive folder ID
-// so we don't search/create it on every single message.
+// Script Properties keys used to cache Drive folder IDs so we don't
+// search/create them again on every single message.
 const INLINE_IMAGE_FOLDER_ID_PROPERTY = 'INLINE_IMAGE_FOLDER_ID';
+const ATTACHMENT_FOLDER_ID_PROPERTY = 'ATTACHMENT_FOLDER_ID';
 
 // Column order for the Announcements sheet. Keeping this as a single
 // source of truth means both the writer (importEmails) and the reader
@@ -248,10 +255,10 @@ function buildRowFromMessage_(message) {
 
   // Excludes inline images (e.g. the letterhead logo) — those are now
   // rendered inline via resolveInlineImages_ above, not listed as
-  // separate downloadable attachments.
-  const attachmentNames = message.getAttachments({ includeInlineImages: false })
-    .map(function (a) { return a.getName(); })
-    .join(', ');
+  // separate downloadable attachments. Uploads each real attachment to
+  // Drive so the website can preview PDFs/images instead of just naming
+  // them; stored as a JSON string (see rowToPublicJson_ for the reader).
+  const attachments = JSON.stringify(uploadAttachmentsToDrive_(message));
 
   // Categorize/summarize from the untruncated text, then truncate only
   // what actually gets written to the sheet (cells cap at 50,000 chars).
@@ -266,7 +273,7 @@ function buildRowFromMessage_(message) {
   row[COLUMNS.indexOf('Summary')] = summary;
   row[COLUMNS.indexOf('BodyText')] = truncateForCell_(bodyText);
   row[COLUMNS.indexOf('BodyHTML')] = truncateForCell_(bodyHtml);
-  row[COLUMNS.indexOf('Attachments')] = attachmentNames;
+  row[COLUMNS.indexOf('Attachments')] = truncateForCell_(attachments);
   row[COLUMNS.indexOf('MessageID')] = messageId;
   row[COLUMNS.indexOf('ImportedAt')] = new Date();
 
@@ -335,13 +342,77 @@ function uploadInlineImageToDrive_(folder, imageBlob) {
 }
 
 /**
+ * Uploads every real (non-inline) attachment on a message to Drive so
+ * the website can preview it, and returns an array of plain objects
+ * ready to be JSON-stringified into the sheet:
+ *   { name, mimeType, previewUrl, viewUrl }
+ * previewUrl is only set for images/PDFs (the two types the website
+ * knows how to preview inline) — null for anything else. viewUrl is a
+ * regular Drive "open" link and is always set when the upload succeeds.
+ * If an individual upload fails, that attachment still gets a { name }
+ * entry so the filename is at least visible, matching the old behavior.
+ */
+function uploadAttachmentsToDrive_(message) {
+  const realAttachments = message.getAttachments({ includeInlineImages: false, includeAttachments: true });
+  if (realAttachments.length === 0) return [];
+
+  const folder = getOrCreateAttachmentFolder_();
+
+  return realAttachments.map(function (attachmentBlob) {
+    const name = attachmentBlob.getName();
+    const mimeType = attachmentBlob.getContentType();
+
+    try {
+      const file = folder.createFile(attachmentBlob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      const fileId = file.getId();
+
+      const isPreviewable = mimeType === 'application/pdf' || mimeType.indexOf('image/') === 0;
+      const previewUrl = isPreviewable
+        ? (mimeType === 'application/pdf'
+          ? 'https://drive.google.com/file/d/' + fileId + '/preview'
+          : 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1000')
+        : null;
+
+      return {
+        name: name,
+        mimeType: mimeType,
+        previewUrl: previewUrl,
+        viewUrl: 'https://drive.google.com/file/d/' + fileId + '/view?usp=sharing'
+      };
+    } catch (e) {
+      Logger.log('Failed to upload attachment "' + name + '" to Drive: ' + e.message);
+      return { name: name, mimeType: mimeType, previewUrl: null, viewUrl: null };
+    }
+  });
+}
+
+/**
  * Returns the Drive folder used to host inline email images, creating
  * it on first use and caching its ID in Script Properties so we don't
  * search/create it again on every message.
  */
 function getOrCreateInlineImageFolder_() {
+  return getOrCreateDriveFolder_(CONFIG.INLINE_IMAGE_FOLDER_NAME, INLINE_IMAGE_FOLDER_ID_PROPERTY);
+}
+
+/**
+ * Returns the Drive folder used to host real file attachments (PDFs,
+ * images, etc.), creating it on first use and caching its ID the same
+ * way as getOrCreateInlineImageFolder_.
+ */
+function getOrCreateAttachmentFolder_() {
+  return getOrCreateDriveFolder_(CONFIG.ATTACHMENT_FOLDER_NAME, ATTACHMENT_FOLDER_ID_PROPERTY);
+}
+
+/**
+ * Shared implementation behind the two folder getters above: looks up a
+ * cached folder ID in Script Properties, falls back to finding/creating
+ * the folder by name, and caches the result for next time.
+ */
+function getOrCreateDriveFolder_(folderName, propertyKey) {
   const properties = PropertiesService.getScriptProperties();
-  const cachedId = properties.getProperty(INLINE_IMAGE_FOLDER_ID_PROPERTY);
+  const cachedId = properties.getProperty(propertyKey);
 
   if (cachedId) {
     try {
@@ -351,10 +422,10 @@ function getOrCreateInlineImageFolder_() {
     }
   }
 
-  const existing = DriveApp.getFoldersByName(CONFIG.INLINE_IMAGE_FOLDER_NAME);
-  const folder = existing.hasNext() ? existing.next() : DriveApp.createFolder(CONFIG.INLINE_IMAGE_FOLDER_NAME);
+  const existing = DriveApp.getFoldersByName(folderName);
+  const folder = existing.hasNext() ? existing.next() : DriveApp.createFolder(folderName);
 
-  properties.setProperty(INLINE_IMAGE_FOLDER_ID_PROPERTY, folder.getId());
+  properties.setProperty(propertyKey, folder.getId());
   return folder;
 }
 
@@ -442,10 +513,7 @@ function doGet(e) {
 function rowToPublicJson_(row) {
   const get = function (columnName) { return row[COLUMNS.indexOf(columnName)]; };
 
-  const attachmentsRaw = get('Attachments');
-  const attachments = attachmentsRaw
-    ? String(attachmentsRaw).split(',').map(function (s) { return s.trim(); }).filter(String)
-    : [];
+  const attachments = parseAttachmentsCell_(get('Attachments'));
 
   return {
     date: get('Date') instanceof Date ? get('Date').toISOString() : get('Date'),
@@ -457,4 +525,32 @@ function rowToPublicJson_(row) {
     attachments: attachments
     // Intentionally omitted: MessageID, Sender, ImportedAt
   };
+}
+
+/**
+ * Parses the Attachments cell into an array of
+ * { name, mimeType, previewUrl, viewUrl } objects.
+ *
+ * Handles two formats for backward compatibility: rows imported after
+ * this feature shipped store a JSON array with full preview metadata;
+ * rows imported before it store a plain comma-separated list of
+ * filenames (the old format). Old rows still show up correctly as
+ * filenames, just without a preview — re-import (delete the row and
+ * let the next scheduled run re-pull it) to get previews for those too.
+ */
+function parseAttachmentsCell_(rawValue) {
+  if (!rawValue) return [];
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {
+    // Not JSON — fall through to the legacy plain-text format below.
+  }
+
+  return String(rawValue)
+    .split(',')
+    .map(function (name) { return name.trim(); })
+    .filter(String)
+    .map(function (name) { return { name: name, mimeType: null, previewUrl: null, viewUrl: null }; });
 }
