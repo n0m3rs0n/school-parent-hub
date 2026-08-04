@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Parent Information Hub</title>
+  <meta name="description" content="Latest school announcements, events, and updates for parents." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🎓</span>
+        <span class="brand-name">School Parent Hub</span>
+      </div>
+      <p class="brand-tagline">Announcements &amp; updates, all in one place</p>
+    </div>
+  </header>
+
+  <!-- ============================== MAIN ============================== -->
+  <main class="container">
+
+    <!-- Controls: search + category filter -->
+    <section class="controls" aria-label="Search and filter announcements">
+      <div class="search-wrap">
+        <label for="search-input" class="visually-hidden">Search announcements</label>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search announcements..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="filter-wrap">
+        <label for="category-select" class="visually-hidden">Filter by category</label>
+        <select id="category-select" class="category-select">
+          <option value="all">All Categories</option>
+          <option value="General">General</option>
+          <option value="Academics">Academics</option>
+          <option value="Events">Events</option>
+          <option value="Finance">Finance</option>
+          <option value="PTA">PTA</option>
+          <option value="Sports">Sports</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Status row: result count -->
+    <p id="result-count" class="result-count" aria-live="polite"></p>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="loading-indicator" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading announcements...</p>
+    </div>
+
+    <!-- No results message -->
+    <div id="no-results" class="no-results" hidden>
+      <p>No announcements found. Try a different search or category.</p>
+    </div>
+
+    <!-- Error message -->
+    <div id="error-message" class="error-message" hidden>
+      <p>Something went wrong while loading announcements. Please try again later.</p>
+    </div>
+
+    <!-- Announcement cards render here -->
+    <section id="announcements-grid" class="announcements-grid" aria-label="Announcements"></section>
+
+  </main>
+
+  <!-- ============================== READ MORE MODAL ============================== -->
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button id="modal-close" class="modal-close" aria-label="Close">&times;</button>
+      <span id="modal-category" class="badge"></span>
+      <h2 id="modal-title" class="modal-title"></h2>
+      <p id="modal-date" class="modal-date"></p>
+      <div id="modal-body" class="modal-body"></div>
+      <div id="modal-attachments" class="modal-attachments"></div>
+    </div>
+  </div>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="footer-year"></span> School Parent Information Hub. Built for our school community.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
