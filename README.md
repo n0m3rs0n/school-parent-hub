@@ -87,7 +87,7 @@ School-Parent-Hub/
 2. Apply this label to the school emails you want imported (manually, or set up
    a Gmail filter that auto-labels mail from your school's domain).
 
-### 3.2 Authorize Gmail access
+### 3.2 Authorize Gmail and Drive access
 
 1. Back in the Apps Script editor, select the function `setupProject` from the
    function dropdown at the top, then click **Run**.
@@ -95,11 +95,22 @@ School-Parent-Hub/
    choose your Google account, click **Advanced → Go to [project name] (unsafe)**
    (this warning appears because the script isn't published/verified by Google —
    it's normal for personal scripts), then **Allow**.
-3. This authorizes the script to read Gmail and edit the spreadsheet.
+3. This authorizes the script to read Gmail, edit the spreadsheet, and create
+   files in Google Drive. The Drive permission is used only to host inline
+   email images (e.g. a letterhead logo) so they can display on the public
+   website — Gmail's `cid:` image references only work inside Gmail itself.
+   Those images are uploaded to a folder named **"School Parent Hub - Inline
+   Images"** in your Drive, and each uploaded file is shared as "anyone with
+   the link can view" — the same public exposure as the announcement it came
+   from, nothing more sensitive.
 4. `setupProject` will:
    - Create the **Announcements** sheet with the correct header row (if missing).
    - Install a time-driven trigger that runs `importEmails` every 15 minutes.
 5. Check the **Executions** tab (left sidebar) to confirm it ran without errors.
+
+> If you're updating an existing deployment to a newer `Code.gs` that added
+> the Drive folder feature, re-run `setupProject` (or `importEmails`) once —
+> Apps Script will prompt you to re-authorize with the added Drive scope.
 
 ### 3.3 Run your first import manually (optional but recommended)
 
@@ -226,10 +237,16 @@ without major rewrites.
   per page with Prev/Next controls (`Pagination` module in `app.js`).
   Search and category filtering still run across the full fetched dataset —
   only rendering is paginated, so results stay accurate across pages.
+- ✅ Inline image hosting (partial "Attachment uploads to Google Drive"):
+  inline email images (e.g. letterhead logos) are uploaded to a shared
+  Drive folder at import time and shown inline in the "Read More" modal —
+  see `resolveInlineImages_` in `Code.gs` and the setup note in
+  [Section 3.2](#32-authorize-gmail-and-drive-access). Regular file
+  attachments (PDFs, etc.) are still just listed by name, not previewed —
+  that's covered by "PDF preview / image preview" below.
 
 **Phase 2 — Not Yet Built**
-- Attachment uploads to Google Drive
-- PDF preview / image preview
+- PDF preview / image preview (for actual file attachments, not inline images)
 - Dark mode
 - Monthly archive view
 - Print announcement

@@ -8,9 +8,12 @@
  * 1. Scans Gmail for messages with the label "School".
  * 2. Skips any message that has already been imported (dedup by Message ID).
  * 3. Auto-categorizes each message using keyword matching.
- * 4. Writes the message data into the "Announcements" Google Sheet.
- * 5. Exposes a doGet() JSON API that the public website reads from.
- * 6. Installs a time-driven trigger that repeats this process every 15 minutes.
+ * 4. Uploads inline email images (e.g. letterhead logos) to a shared Drive
+ *    folder and rewrites the HTML body to point at them, since Gmail's
+ *    cid: image references don't resolve outside Gmail.
+ * 5. Writes the message data into the "Announcements" Google Sheet.
+ * 6. Exposes a doGet() JSON API that the public website reads from.
+ * 7. Installs a time-driven trigger that repeats this process every 15 minutes.
  *
  * SETUP
  * -----
@@ -22,13 +25,13 @@
  *   4. Run `setupProject` once from the Apps Script editor to:
  *        - create the "Announcements" sheet with headers
  *        - install the 15-minute time trigger
- *      (this also triggers the Gmail authorization prompt)
+ *      (this also triggers the Gmail + Drive authorization prompt)
  *   5. Deploy > New deployment > Web app to get the JSON API URL.
  *
  * FUTURE PHASES (NOT IMPLEMENTED YET — see README "Roadmap")
  * ------------------------------------------------------------------
- * Phase 2: Drive attachment uploads, PDF/image preview, dark mode,
- *          pagination, monthly archive, print/share, rich text, advanced search.
+ * Phase 2: PDF/image attachment preview, dark mode, monthly archive,
+ *          print/share, better category management, advanced search.
  * Phase 3: Admin dashboard, multi-school/multi-label support, auth,
  *          push notifications, email subscriptions, calendar integration, etc.
  *
@@ -65,8 +68,19 @@ const CONFIG = {
   // Google Sheets hard-caps a single cell at 50,000 characters. Body
   // fields (especially HTML with inline styles/images) can exceed that,
   // so we truncate before writing. Kept comfortably under the real limit.
-  MAX_CELL_LENGTH: 49000
+  MAX_CELL_LENGTH: 49000,
+
+  // Drive folder where inline email images (e.g. letterhead logos) get
+  // uploaded so they can be shown on the public website — a cid: image
+  // reference only resolves inside Gmail, not in a browser. Files here
+  // are shared "anyone with the link can view", matching the fact that
+  // everything imported is already a public school announcement.
+  INLINE_IMAGE_FOLDER_NAME: 'School Parent Hub - Inline Images'
 };
+
+// Script Properties key used to cache the inline-image Drive folder ID
+// so we don't search/create it on every single message.
+const INLINE_IMAGE_FOLDER_ID_PROPERTY = 'INLINE_IMAGE_FOLDER_ID';
 
 // Column order for the Announcements sheet. Keeping this as a single
 // source of truth means both the writer (importEmails) and the reader
@@ -227,10 +241,17 @@ function buildRowFromMessage_(message) {
   const subject = message.getSubject() || '(no subject)';
   const sender = message.getFrom() || '';
   const bodyText = message.getPlainBody() || '';
-  const bodyHtml = message.getBody() || '';
+  const rawBodyHtml = message.getBody() || '';
+  const bodyHtml = resolveInlineImages_(rawBodyHtml, message);
   const date = message.getDate();
   const messageId = message.getId();
-  const attachmentNames = message.getAttachments().map(function (a) { return a.getName(); }).join(', ');
+
+  // Excludes inline images (e.g. the letterhead logo) — those are now
+  // rendered inline via resolveInlineImages_ above, not listed as
+  // separate downloadable attachments.
+  const attachmentNames = message.getAttachments({ includeInlineImages: false })
+    .map(function (a) { return a.getName(); })
+    .join(', ');
 
   // Categorize/summarize from the untruncated text, then truncate only
   // what actually gets written to the sheet (cells cap at 50,000 chars).
@@ -250,6 +271,91 @@ function buildRowFromMessage_(message) {
   row[COLUMNS.indexOf('ImportedAt')] = new Date();
 
   return row;
+}
+
+/**
+ * Replaces cid: image references in an HTML email body (which only
+ * resolve inside Gmail) with public Drive-hosted URLs, so the website
+ * can actually display them (e.g. a letterhead logo).
+ *
+ * LIMITATION: Apps Script's basic Gmail service doesn't expose each
+ * inline image's real Content-ID, so cid: references are matched to
+ * inline image blobs positionally (the Nth cid: reference in the HTML
+ * gets the Nth inline image found). This is reliable for the common
+ * case of a single embedded image (e.g. a logo) and is a limitation of
+ * the free/basic Gmail API — full correctness would require enabling
+ * the Gmail Advanced Service to read raw MIME headers.
+ */
+function resolveInlineImages_(bodyHtml, message) {
+  if (!bodyHtml || bodyHtml.indexOf('cid:') === -1) return bodyHtml;
+
+  const inlineImages = message.getAttachments({ includeAttachments: false, includeInlineImages: true });
+  if (inlineImages.length === 0) return bodyHtml;
+
+  const folder = getOrCreateInlineImageFolder_();
+  const cidPattern = /cid:([^"'\s)>]+)/g;
+  const cidToUrl = {};
+  let imageIndex = 0;
+  let match;
+
+  while ((match = cidPattern.exec(bodyHtml)) !== null) {
+    const cid = match[1];
+    if (cidToUrl[cid]) continue; // already resolved this one
+
+    if (imageIndex >= inlineImages.length) break; // more cid: refs than images found
+    const url = uploadInlineImageToDrive_(folder, inlineImages[imageIndex]);
+    imageIndex++;
+
+    if (url) cidToUrl[cid] = url;
+  }
+
+  let resolvedHtml = bodyHtml;
+  Object.keys(cidToUrl).forEach(function (cid) {
+    resolvedHtml = resolvedHtml.split('cid:' + cid).join(cidToUrl[cid]);
+  });
+
+  return resolvedHtml;
+}
+
+/**
+ * Uploads one inline image blob to the shared Drive folder and returns
+ * a publicly viewable URL, or null if the upload fails for any reason
+ * (quota, permissions, etc.) — callers fall back to leaving the cid:
+ * reference as-is, which the website's sanitizer safely drops.
+ */
+function uploadInlineImageToDrive_(folder, imageBlob) {
+  try {
+    const file = folder.createFile(imageBlob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1000';
+  } catch (e) {
+    Logger.log('Failed to upload inline image to Drive: ' + e.message);
+    return null;
+  }
+}
+
+/**
+ * Returns the Drive folder used to host inline email images, creating
+ * it on first use and caching its ID in Script Properties so we don't
+ * search/create it again on every message.
+ */
+function getOrCreateInlineImageFolder_() {
+  const properties = PropertiesService.getScriptProperties();
+  const cachedId = properties.getProperty(INLINE_IMAGE_FOLDER_ID_PROPERTY);
+
+  if (cachedId) {
+    try {
+      return DriveApp.getFolderById(cachedId);
+    } catch (e) {
+      // Cached folder was deleted/moved — fall through and recreate it.
+    }
+  }
+
+  const existing = DriveApp.getFoldersByName(CONFIG.INLINE_IMAGE_FOLDER_NAME);
+  const folder = existing.hasNext() ? existing.next() : DriveApp.createFolder(CONFIG.INLINE_IMAGE_FOLDER_NAME);
+
+  properties.setProperty(INLINE_IMAGE_FOLDER_ID_PROPERTY, folder.getId());
+  return folder;
 }
 
 /**
