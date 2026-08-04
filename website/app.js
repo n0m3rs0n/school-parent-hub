@@ -26,7 +26,11 @@ const CONFIG = {
     Finance: 'badge--finance',
     PTA: 'badge--pta',
     Sports: 'badge--sports'
-  }
+  },
+
+  // Announcements shown per page. All filtering/searching still happens
+  // across the full fetched dataset — only rendering is paginated.
+  PAGE_SIZE: 9
 };
 
 // ============================================================================
@@ -34,9 +38,10 @@ const CONFIG = {
 // ============================================================================
 const state = {
   allAnnouncements: [], // full dataset as fetched from the API
-  filtered: [],         // subset currently shown, after search + category filter
+  filtered: [],         // subset matching search + category filter, across all pages
   searchTerm: '',
-  category: 'all'
+  category: 'all',
+  currentPage: 1
 };
 
 // ============================================================================
@@ -57,7 +62,11 @@ const dom = {
   modalCategory: document.getElementById('modal-category'),
   modalBody: document.getElementById('modal-body'),
   modalAttachments: document.getElementById('modal-attachments'),
-  footerYear: document.getElementById('footer-year')
+  footerYear: document.getElementById('footer-year'),
+  pagination: document.getElementById('pagination'),
+  paginationPrev: document.getElementById('pagination-prev'),
+  paginationNext: document.getElementById('pagination-next'),
+  paginationStatus: document.getElementById('pagination-status')
 };
 
 // ============================================================================
@@ -101,6 +110,9 @@ const Filters = {
 
       return haystack.includes(term);
     });
+
+    // A new search/filter always starts back on page 1.
+    state.currentPage = 1;
   }
 };
 
@@ -109,8 +121,8 @@ const Filters = {
 // ============================================================================
 const Render = {
   /**
-   * Renders the current state.filtered list as cards, or shows the
-   * "no results" message when the list is empty.
+   * Renders the current page of state.filtered as cards, or shows the
+   * "no results" message when the filtered list is empty.
    */
   announcements() {
     dom.grid.innerHTML = '';
@@ -118,18 +130,25 @@ const Render = {
     if (state.filtered.length === 0) {
       dom.noResults.hidden = false;
       dom.resultCount.textContent = '';
+      Pagination.render();
       return;
     }
 
     dom.noResults.hidden = true;
 
+    const pageItems = Pagination.getPageItems();
+    const pageStartIndex = (state.currentPage - 1) * CONFIG.PAGE_SIZE;
+
     const fragment = document.createDocumentFragment();
-    state.filtered.forEach((item, index) => {
-      fragment.appendChild(Render.card(item, index));
+    pageItems.forEach((item, i) => {
+      // Use the item's absolute index within state.filtered (not its
+      // position on this page) so Read More can look it back up correctly.
+      fragment.appendChild(Render.card(item, pageStartIndex + i));
     });
     dom.grid.appendChild(fragment);
 
     Render.resultCount();
+    Pagination.render();
   },
 
   /** Builds a single announcement card element. */
@@ -182,6 +201,7 @@ const Render = {
     dom.loading.hidden = false;
     dom.errorMessage.hidden = true;
     dom.noResults.hidden = true;
+    dom.pagination.hidden = true;
     dom.grid.innerHTML = '';
   },
 
@@ -192,8 +212,48 @@ const Render = {
   showError() {
     dom.errorMessage.hidden = false;
     dom.loading.hidden = true;
+    dom.pagination.hidden = true;
     dom.grid.innerHTML = '';
     dom.resultCount.textContent = '';
+  }
+};
+
+// ============================================================================
+// PAGINATION MODULE — slices state.filtered into pages for the grid
+// ============================================================================
+const Pagination = {
+  totalPages() {
+    return Math.max(1, Math.ceil(state.filtered.length / CONFIG.PAGE_SIZE));
+  },
+
+  /** Returns the slice of state.filtered belonging to state.currentPage. */
+  getPageItems() {
+    const start = (state.currentPage - 1) * CONFIG.PAGE_SIZE;
+    return state.filtered.slice(start, start + CONFIG.PAGE_SIZE);
+  },
+
+  goTo(page) {
+    const clamped = Math.min(Math.max(1, page), Pagination.totalPages());
+    if (clamped === state.currentPage) return;
+
+    state.currentPage = clamped;
+    Render.announcements();
+    dom.grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+
+  /** Shows/hides and updates the Prev/Next controls for the current state. */
+  render() {
+    const total = Pagination.totalPages();
+
+    if (state.filtered.length === 0 || total <= 1) {
+      dom.pagination.hidden = true;
+      return;
+    }
+
+    dom.pagination.hidden = false;
+    dom.paginationStatus.textContent = `Page ${state.currentPage} of ${total}`;
+    dom.paginationPrev.disabled = state.currentPage <= 1;
+    dom.paginationNext.disabled = state.currentPage >= total;
   }
 };
 
@@ -376,6 +436,14 @@ function handleModalOverlayClick(event) {
   if (event.target === dom.modalOverlay) Modal.close();
 }
 
+function handlePaginationPrev() {
+  Pagination.goTo(state.currentPage - 1);
+}
+
+function handlePaginationNext() {
+  Pagination.goTo(state.currentPage + 1);
+}
+
 function handleKeydown(event) {
   if (event.key === 'Escape' && !dom.modalOverlay.hidden) Modal.close();
 }
@@ -392,6 +460,8 @@ async function init() {
   dom.modalClose.addEventListener('click', Modal.close);
   dom.modalOverlay.addEventListener('click', handleModalOverlayClick);
   document.addEventListener('keydown', handleKeydown);
+  dom.paginationPrev.addEventListener('click', handlePaginationPrev);
+  dom.paginationNext.addEventListener('click', handlePaginationNext);
 
   Render.showLoading();
 

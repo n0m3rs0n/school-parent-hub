@@ -222,12 +222,15 @@ without major rewrites.
   email body (links, lists, tables, images) through a hand-written
   allowlist sanitizer in `app.js` (`Sanitize` module) — see the security
   note in [Section 2](#2-how-it-works).
+- ✅ Pagination: the grid shows `CONFIG.PAGE_SIZE` (default 9) announcements
+  per page with Prev/Next controls (`Pagination` module in `app.js`).
+  Search and category filtering still run across the full fetched dataset —
+  only rendering is paginated, so results stay accurate across pages.
 
 **Phase 2 — Not Yet Built**
 - Attachment uploads to Google Drive
 - PDF preview / image preview
 - Dark mode
-- Pagination
 - Monthly archive view
 - Print announcement
 - Share button
