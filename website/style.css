@@ -335,6 +335,63 @@ img {
   font-size: 1rem;
 }
 
+/* Applied when rendering a sanitized HTML email body instead of plain
+   text — real markup already provides its own line breaks/spacing. */
+.modal-body.is-rich {
+  white-space: normal;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+
+.modal-body.is-rich p {
+  margin: 0 0 12px;
+}
+
+.modal-body.is-rich a {
+  color: var(--color-primary);
+}
+
+.modal-body.is-rich img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: 8px 0;
+}
+
+.modal-body.is-rich ul,
+.modal-body.is-rich ol {
+  padding-left: 22px;
+  margin: 0 0 12px;
+}
+
+.modal-body.is-rich blockquote {
+  margin: 0 0 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.modal-body.is-rich table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 12px;
+  display: block;
+  overflow-x: auto;
+}
+
+.modal-body.is-rich th,
+.modal-body.is-rich td {
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.modal-body.is-rich hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 16px 0;
+}
+
 .modal-attachments {
   margin-top: 16px;
   font-size: 0.9rem;

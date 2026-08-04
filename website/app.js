@@ -4,8 +4,8 @@
  * ============================================================================
  * Fetches announcement data from the Apps Script JSON API and renders it
  * as searchable, filterable cards. No frameworks — vanilla ES6, organized
- * into small modules (Config, Api, State, Render, Filters, Modal, Init)
- * so future features (Phase 2/3 in the README) can be added without
+ * into small modules (Config, Api, State, Render, Filters, Sanitize, Modal,
+ * Init) so future features (Phase 2/3 in the README) can be added without
  * rewriting this file.
  * ============================================================================
  */
@@ -198,6 +198,119 @@ const Render = {
 };
 
 // ============================================================================
+// SANITIZE MODULE — whitelist-based HTML cleaner for rendering email bodies
+// ============================================================================
+// The Apps Script API returns the raw HTML email body as `bodyHtml`. That
+// HTML is untrusted (it originates from arbitrary inbound email) and is
+// never safe to insert into the page as-is. There's no external sanitizer
+// library here (the project intentionally stays dependency-free), so this
+// module implements a conservative allowlist: unknown/dangerous tags are
+// unwrapped or removed entirely, and every attribute is stripped except a
+// hand-verified href/src on links and images.
+const Sanitize = {
+  ALLOWED_TAGS: new Set([
+    'P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'A', 'UL', 'OL', 'LI',
+    'SPAN', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
+    'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH', 'IMG', 'HR', 'SMALL',
+    'SUB', 'SUP'
+  ]),
+
+  // Removed along with their entire subtree (never just unwrapped) —
+  // these can carry executable content or hijack page behavior.
+  REMOVE_ENTIRELY_TAGS: new Set([
+    'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'FORM', 'INPUT',
+    'BUTTON', 'LINK', 'META', 'SVG', 'BASE'
+  ]),
+
+  /**
+   * Parses rawHtml and returns a sanitized DocumentFragment safe to
+   * append into the live page.
+   */
+  toFragment(rawHtml) {
+    const fragment = document.createDocumentFragment();
+    if (!rawHtml) return fragment;
+
+    const parsedDoc = new DOMParser().parseFromString(rawHtml, 'text/html');
+    Sanitize.cleanNode(parsedDoc.body);
+
+    Array.from(parsedDoc.body.childNodes).forEach((node) => {
+      fragment.appendChild(document.importNode(node, true));
+    });
+
+    return fragment;
+  },
+
+  /** Recursively strips disallowed tags/attributes from a node's children. */
+  cleanNode(root) {
+    Array.from(root.childNodes).forEach((node) => {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        node.remove();
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      const tag = node.tagName;
+
+      if (Sanitize.REMOVE_ENTIRELY_TAGS.has(tag)) {
+        node.remove();
+        return;
+      }
+
+      // Clean children first so a disallowed tag's still-allowed
+      // descendants (e.g. a stray <span> inside a stripped <font>) survive.
+      Sanitize.cleanNode(node);
+
+      if (!Sanitize.ALLOWED_TAGS.has(tag)) {
+        while (node.firstChild) {
+          node.parentNode.insertBefore(node.firstChild, node);
+        }
+        node.remove();
+        return;
+      }
+
+      Sanitize.cleanAttributes(node);
+    });
+  },
+
+  /** Strips every attribute, then re-adds only verified-safe ones. */
+  cleanAttributes(el) {
+    const tag = el.tagName;
+    const safeHref = tag === 'A' ? Sanitize.safeUrl(el.getAttribute('href'), ['http:', 'https:', 'mailto:']) : null;
+    const safeSrc = tag === 'IMG' ? Sanitize.safeUrl(el.getAttribute('src'), ['http:', 'https:']) : null;
+    const altText = el.getAttribute('alt');
+
+    Array.from(el.attributes).forEach((attr) => el.removeAttribute(attr.name));
+
+    if (tag === 'A') {
+      if (!safeHref) return; // leave as a plain, non-clickable span of text
+      el.setAttribute('href', safeHref);
+      el.setAttribute('target', '_blank');
+      el.setAttribute('rel', 'noopener noreferrer');
+    }
+
+    if (tag === 'IMG') {
+      if (!safeSrc) {
+        el.remove(); // no trustworthy source — drop rather than show a broken/unsafe image
+        return;
+      }
+      el.setAttribute('src', safeSrc);
+      if (altText) el.setAttribute('alt', altText);
+    }
+  },
+
+  /** Resolves a URL and returns it only if its protocol is in the allowlist. */
+  safeUrl(rawUrl, allowedProtocols) {
+    if (!rawUrl) return null;
+    try {
+      const url = new URL(rawUrl, window.location.href);
+      return allowedProtocols.includes(url.protocol) ? url.href : null;
+    } catch (e) {
+      return null;
+    }
+  }
+};
+
+// ============================================================================
 // MODAL MODULE — Read More dialog
 // ============================================================================
 const Modal = {
@@ -209,7 +322,14 @@ const Modal = {
     dom.modalCategory.textContent = item.category;
     dom.modalCategory.className = `badge ${badgeClass}`;
 
-    dom.modalBody.textContent = item.body;
+    dom.modalBody.innerHTML = '';
+    if (item.bodyHtml) {
+      dom.modalBody.classList.add('is-rich');
+      dom.modalBody.appendChild(Sanitize.toFragment(item.bodyHtml));
+    } else {
+      dom.modalBody.classList.remove('is-rich');
+      dom.modalBody.textContent = item.body || '';
+    }
 
     dom.modalAttachments.innerHTML = '';
     if (item.attachments && item.attachments.length > 0) {

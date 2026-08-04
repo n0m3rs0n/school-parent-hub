@@ -55,10 +55,20 @@ School-Parent-Hub/
    - Writes a summary + all fields into the **Announcements** Google Sheet.
 4. The same Apps Script project is deployed as a **Web App**. Its `doGet()`
    function reads the sheet and returns ONLY the public-safe fields as JSON:
-   `date, title, category, summary, body, attachments`.
+   `date, title, category, summary, body, bodyHtml, attachments`.
    It never exposes Message ID, sender email, or import timestamps.
 5. The static website (`website/`) fetches that JSON URL and renders cards,
-   with client-side search, category filtering, and a "Read More" modal.
+   with client-side search, category filtering, and a "Read More" modal that
+   renders the announcement's original HTML formatting (links, lists, tables,
+   images) via a hand-written sanitizer in `app.js`.
+
+> **Security note on `bodyHtml`:** this field is the *raw, unsanitized* HTML
+> from the original email. It's safe to fetch, but never insert it into a
+> page with `innerHTML` without sanitizing first — `website/app.js`'s
+> `Sanitize` module does this (strips scripts/styles/event handlers/unsafe
+> URLs) before rendering it in the modal. If you build another consumer of
+> this API, sanitize `bodyHtml` yourself before rendering it, or stick to
+> the plain-text `body` field.
 
 ---
 
@@ -202,12 +212,18 @@ School-Parent-Hub/
 
 ---
 
-## 8. Roadmap (Not Yet Built)
+## 8. Roadmap
 
 The codebase is intentionally modular so these can be layered in later
 without major rewrites.
 
-**Phase 2**
+**Phase 2 — Implemented**
+- ✅ Rich text rendering: the "Read More" modal renders the original HTML
+  email body (links, lists, tables, images) through a hand-written
+  allowlist sanitizer in `app.js` (`Sanitize` module) — see the security
+  note in [Section 2](#2-how-it-works).
+
+**Phase 2 — Not Yet Built**
 - Attachment uploads to Google Drive
 - PDF preview / image preview
 - Dark mode
@@ -216,7 +232,6 @@ without major rewrites.
 - Print announcement
 - Share button
 - Better category management (custom categories, per-category colors config)
-- Rich text rendering of HTML body
 - Advanced search (date range, sender, multi-category)
 
 **Phase 3**

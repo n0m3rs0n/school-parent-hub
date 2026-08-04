@@ -347,7 +347,8 @@ function rowToPublicJson_(row) {
     category: get('Category'),
     summary: get('Summary'),
     body: get('BodyText'),
+    bodyHtml: get('BodyHTML'),
     attachments: attachments
-    // Intentionally omitted: MessageID, Sender, ImportedAt, BodyHTML
+    // Intentionally omitted: MessageID, Sender, ImportedAt
   };
 }
