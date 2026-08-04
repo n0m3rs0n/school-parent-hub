@@ -338,6 +338,8 @@ const Sanitize = {
     const safeHref = tag === 'A' ? Sanitize.safeUrl(el.getAttribute('href'), ['http:', 'https:', 'mailto:']) : null;
     const safeSrc = tag === 'IMG' ? Sanitize.safeUrl(el.getAttribute('src'), ['http:', 'https:']) : null;
     const altText = el.getAttribute('alt');
+    const safeColspan = (tag === 'TD' || tag === 'TH') ? Sanitize.safeSpan(el.getAttribute('colspan')) : null;
+    const safeRowspan = (tag === 'TD' || tag === 'TH') ? Sanitize.safeSpan(el.getAttribute('rowspan')) : null;
 
     Array.from(el.attributes).forEach((attr) => el.removeAttribute(attr.name));
 
@@ -356,6 +358,19 @@ const Sanitize = {
       el.setAttribute('src', safeSrc);
       if (altText) el.setAttribute('alt', altText);
     }
+
+    // Structural only — no colors/fonts/widths are restored, so every
+    // announcement keeps the site's own look regardless of sender styling.
+    // Kept safe because these are plain positive integers, not free text.
+    if (safeColspan) el.setAttribute('colspan', safeColspan);
+    if (safeRowspan) el.setAttribute('rowspan', safeRowspan);
+  },
+
+  /** Validates a table colspan/rowspan value: a positive integer, capped to a sane max. */
+  safeSpan(rawValue) {
+    const n = parseInt(rawValue, 10);
+    if (!Number.isInteger(n) || n < 1) return null;
+    return String(Math.min(n, 20));
   },
 
   /** Resolves a URL and returns it only if its protocol is in the allowlist. */
