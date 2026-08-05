@@ -7,12 +7,22 @@
   <meta name="description" content="Class documents and resources for parents." />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="style.css" />
+  <!-- Applies the saved/system theme before first paint, avoiding a flash
+       of the wrong theme. theme.js (loaded later) only handles the toggle. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
 
   <!-- ============================== HEADER ============================== -->
   <header class="site-header">
     <div class="header-inner">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
       <div class="brand">
         <span class="brand-icon" aria-hidden="true">❤️</span>
         <span class="brand-name">11-Escribano Parent Hub</span>
@@ -89,6 +99,7 @@
     <p>&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
   </footer>
 
+  <script src="theme.js"></script>
   <script>
     document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>

@@ -30,9 +30,10 @@ School-Parent-Hub/
 ├── website/
 │   ├── index.html      # Page markup: header, search/filter, cards, modal, footer
 │   ├── resources.html   # Static list of class documents (Drive links) — no API involved
-│   ├── style.css          # Material-inspired styling, responsive, accessible
+│   ├── style.css          # Material-inspired styling, responsive, accessible, light/dark
 │   ├── app.js               # Fetches JSON API, renders cards, search/filter/modal logic
-│   └── robots.txt            # Blocks search-engine indexing (site is meant for private sharing)
+│   ├── theme.js               # Dark mode toggle, shared by index.html and resources.html
+│   └── robots.txt                # Blocks search-engine indexing (site is meant for private sharing)
 │
 ├── apps-script/
 │   └── Code.gs           # Gmail import, categorization, Sheet writer, JSON API
@@ -262,9 +263,17 @@ without major rewrites.
   filename, now linked to an "open in Drive" view instead of being
   inert text. Rows imported before this shipped keep showing plain
   filenames with no preview — delete and let a row re-import to upgrade it.
+- ✅ Dark mode: a toggle button in the header (top-right) switches between
+  light and dark, defaulting to the visitor's OS-level preference on first
+  visit and persisting the choice in `localStorage` after that (shared
+  `theme.js`, used by both pages). Implemented as CSS custom-property
+  overrides under `:root[data-theme="dark"]` in `style.css` — the header's
+  own blue background intentionally stays fixed across both themes
+  (`--color-header-bg`, kept separate from `--color-primary`, which does
+  change in dark mode for links/accents on the page body) so its white
+  text keeps sufficient contrast in both modes.
 
 **Phase 2 — Not Yet Built**
-- Dark mode
 - Monthly archive view
 - Print announcement
 - Share button

@@ -8,12 +8,20 @@
 :root {
   --color-primary: #1a56db;
   --color-primary-dark: #1e429f;
+  /* Deliberately independent of --color-primary: the header keeps this
+     exact blue in both themes (a fixed brand color), while --color-primary
+     itself gets brightened for dark mode so links/accents stay visible on
+     a dark page background. Sharing one variable between "header
+     background behind white text" and "accent color on a dark surface"
+     would force a value that can't satisfy both contrast requirements. */
+  --color-header-bg: #1a56db;
   --color-accent: #0e9f6e;
   --color-bg: #f4f6fb;
   --color-surface: #ffffff;
   --color-text: #1f2937;
   --color-text-muted: #5b6472;
   --color-border: #e3e7ef;
+  --color-danger: #b91c1c;
 
   --category-general: #6b7280;
   --category-academics: #1a56db;
@@ -29,6 +37,27 @@
   --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.18);
 
   --header-height: 96px;
+}
+
+/* Dark theme overrides, applied via a data-theme attribute on <html> that
+   theme.js sets before first paint (see the inline script in <head> of
+   each page) — this avoids a flash of the wrong theme on load. Category
+   badge colors are left unchanged: they're solid, saturated backgrounds
+   with white text, so their contrast doesn't depend on the page theme. */
+:root[data-theme="dark"] {
+  --color-primary: #5b8def;
+  --color-primary-dark: #3b6fd6;
+  --color-accent: #22c58b;
+  --color-bg: #10141c;
+  --color-surface: #1a2130;
+  --color-text: #e6e9ef;
+  --color-text-muted: #9aa3b5;
+  --color-border: #2b3346;
+  --color-danger: #f87171;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
 /* ---------- Reset ---------- */
@@ -71,7 +100,7 @@ img {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: var(--color-primary);
+  background-color: var(--color-header-bg);
   color: #fff;
   box-shadow: var(--shadow-md);
 }
@@ -80,6 +109,30 @@ img {
   max-width: 1100px;
   margin: 0 auto;
   padding: 16px 20px;
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .brand {
@@ -202,7 +255,7 @@ img {
 }
 
 .error-message {
-  color: #b91c1c;
+  color: var(--color-danger);
 }
 
 /* ---------- Announcement grid & cards ---------- */
