@@ -272,13 +272,20 @@ without major rewrites.
   (`--color-header-bg`, kept separate from `--color-primary`, which does
   change in dark mode for links/accents on the page body) so its white
   text keeps sufficient contrast in both modes.
+- ✅ Advanced search (date range + multi-category): the single category
+  dropdown was replaced with toggle-able chips (`category-chips` in
+  `index.html`) — click any combination of categories to see an OR match
+  across all of them, or "All" to clear the selection. A collapsible
+  "Advanced search" panel below adds an inclusive From/To date range.
+  All three filters (text, categories, dates) combine with AND logic in
+  `Filters.apply()`. "Sender" was intentionally left out — the public API
+  never exposes sender email, by the Phase 1 privacy design.
 
 **Phase 2 — Not Yet Built**
 - Monthly archive view
 - Print announcement
 - Share button
 - Better category management (custom categories, per-category colors config)
-- Advanced search (date range, sender, multi-category)
 
 **Phase 3**
 - Admin dashboard

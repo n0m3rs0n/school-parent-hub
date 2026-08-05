@@ -193,18 +193,11 @@ img {
   margin-bottom: 16px;
 }
 
-@media (min-width: 640px) {
-  .controls {
-    flex-direction: row;
-  }
-}
-
 .search-wrap {
-  flex: 1;
+  width: 100%;
 }
 
-.search-input,
-.category-select {
+.search-input {
   width: 100%;
   padding: 12px 16px;
   font-size: 1rem;
@@ -214,14 +207,106 @@ img {
   color: var(--color-text);
 }
 
-.search-input:focus,
-.category-select:focus {
+.search-input:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
 
-.filter-wrap {
-  min-width: 200px;
+/* ---------- Category filter chips (multi-select) ---------- */
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-chip {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.category-chip:hover,
+.category-chip:focus {
+  border-color: var(--color-primary);
+}
+
+.category-chip.is-active {
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Reuse the same per-category colors as the card badges when active. */
+.category-chip.is-active[data-category="all"] { background-color: var(--color-text-muted); }
+.category-chip.is-active[data-category="General"] { background-color: var(--category-general); }
+.category-chip.is-active[data-category="Academics"] { background-color: var(--category-academics); }
+.category-chip.is-active[data-category="Events"] { background-color: var(--category-events); }
+.category-chip.is-active[data-category="Finance"] { background-color: var(--category-finance); }
+.category-chip.is-active[data-category="PTA"] { background-color: var(--category-pta); }
+.category-chip.is-active[data-category="Sports"] { background-color: var(--category-sports); }
+
+/* ---------- Advanced search (date range) ---------- */
+.advanced-search-toggle {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.advanced-search-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.advanced-search-panel[hidden] {
+  display: none;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.date-field input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.date-clear-btn {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.date-clear-btn:hover,
+.date-clear-btn:focus {
+  color: var(--color-text);
 }
 
 /* ---------- Result count ---------- */

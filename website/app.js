@@ -38,9 +38,11 @@ const CONFIG = {
 // ============================================================================
 const state = {
   allAnnouncements: [], // full dataset as fetched from the API
-  filtered: [],         // subset matching search + category filter, across all pages
+  filtered: [],         // subset matching search + filters, across all pages
   searchTerm: '',
-  category: 'all',
+  selectedCategories: new Set(), // empty = no category restriction ("All")
+  dateFrom: '', // yyyy-mm-dd from <input type="date">, or '' for no lower bound
+  dateTo: '',   // yyyy-mm-dd, or '' for no upper bound
   currentPage: 1
 };
 
@@ -54,7 +56,12 @@ const dom = {
   errorMessage: document.getElementById('error-message'),
   resultCount: document.getElementById('result-count'),
   searchInput: document.getElementById('search-input'),
-  categorySelect: document.getElementById('category-select'),
+  categoryChips: document.querySelectorAll('.category-chip'),
+  advancedSearchToggle: document.getElementById('advanced-search-toggle'),
+  advancedSearchPanel: document.getElementById('advanced-search-panel'),
+  dateFrom: document.getElementById('date-from'),
+  dateTo: document.getElementById('date-to'),
+  dateClear: document.getElementById('date-clear'),
   modalOverlay: document.getElementById('modal-overlay'),
   modalClose: document.getElementById('modal-close'),
   modalTitle: document.getElementById('modal-title'),
@@ -92,15 +99,25 @@ const Api = {
 // ============================================================================
 const Filters = {
   /**
-   * Applies the current search term and category to the full dataset,
-   * storing the result in state.filtered.
+   * Applies the current search term, category selection, and date range
+   * to the full dataset, storing the result in state.filtered.
    */
   apply() {
     const term = state.searchTerm.trim().toLowerCase();
+    const hasCategoryFilter = state.selectedCategories.size > 0;
+
+    // Bounds are inclusive: dateFrom's whole day counts, as does dateTo's.
+    const fromBound = state.dateFrom ? new Date(state.dateFrom + 'T00:00:00') : null;
+    const toBound = state.dateTo ? new Date(state.dateTo + 'T23:59:59') : null;
 
     state.filtered = state.allAnnouncements.filter((item) => {
-      const matchesCategory = state.category === 'all' || item.category === state.category;
-      if (!matchesCategory) return false;
+      if (hasCategoryFilter && !state.selectedCategories.has(item.category)) return false;
+
+      if (fromBound || toBound) {
+        const itemDate = new Date(item.date);
+        if (fromBound && itemDate < fromBound) return false;
+        if (toBound && itemDate > toBound) return false;
+      }
 
       if (!term) return true;
 
@@ -267,6 +284,17 @@ const Render = {
 
     item.appendChild(nameRow);
     return item;
+  },
+
+  /** Syncs each category chip's active state with state.selectedCategories. */
+  categoryChips() {
+    const noneSelected = state.selectedCategories.size === 0;
+
+    dom.categoryChips.forEach((chip) => {
+      const isAll = chip.dataset.category === 'all';
+      const isActive = isAll ? noneSelected : state.selectedCategories.has(chip.dataset.category);
+      chip.classList.toggle('is-active', isActive);
+    });
   },
 
   showLoading() {
@@ -501,10 +529,48 @@ function handleSearchInput(event) {
   Render.announcements();
 }
 
-function handleCategoryChange(event) {
-  state.category = event.target.value;
+function handleCategoryChipClick(event) {
+  const chip = event.target.closest('.category-chip');
+  if (!chip) return;
+
+  if (chip.dataset.category === 'all') {
+    state.selectedCategories.clear();
+  } else {
+    if (state.selectedCategories.has(chip.dataset.category)) {
+      state.selectedCategories.delete(chip.dataset.category);
+    } else {
+      state.selectedCategories.add(chip.dataset.category);
+    }
+  }
+
+  Render.categoryChips();
   Filters.apply();
   Render.announcements();
+}
+
+function handleDateChange() {
+  state.dateFrom = dom.dateFrom.value;
+  state.dateTo = dom.dateTo.value;
+  Filters.apply();
+  Render.announcements();
+}
+
+function handleDateClear() {
+  dom.dateFrom.value = '';
+  dom.dateTo.value = '';
+  state.dateFrom = '';
+  state.dateTo = '';
+  Filters.apply();
+  Render.announcements();
+}
+
+function handleAdvancedSearchToggle() {
+  const isExpanded = dom.advancedSearchToggle.getAttribute('aria-expanded') === 'true';
+  dom.advancedSearchToggle.setAttribute('aria-expanded', String(!isExpanded));
+  dom.advancedSearchToggle.textContent = isExpanded
+    ? '▸ Advanced search (date range)'
+    : '▾ Advanced search (date range)';
+  dom.advancedSearchPanel.hidden = isExpanded;
 }
 
 function handleGridClick(event) {
@@ -539,7 +605,11 @@ async function init() {
   dom.footerYear.textContent = new Date().getFullYear();
 
   dom.searchInput.addEventListener('input', handleSearchInput);
-  dom.categorySelect.addEventListener('change', handleCategoryChange);
+  dom.categoryChips.forEach((chip) => chip.addEventListener('click', handleCategoryChipClick));
+  dom.advancedSearchToggle.addEventListener('click', handleAdvancedSearchToggle);
+  dom.dateFrom.addEventListener('change', handleDateChange);
+  dom.dateTo.addEventListener('change', handleDateChange);
+  dom.dateClear.addEventListener('click', handleDateClear);
   dom.grid.addEventListener('click', handleGridClick);
   dom.modalClose.addEventListener('click', Modal.close);
   dom.modalOverlay.addEventListener('click', handleModalOverlayClick);

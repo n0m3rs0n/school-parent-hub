@@ -51,17 +51,38 @@
         />
       </div>
 
-      <div class="filter-wrap">
-        <label for="category-select" class="visually-hidden">Filter by category</label>
-        <select id="category-select" class="category-select">
-          <option value="all">All Categories</option>
-          <option value="General">General</option>
-          <option value="Academics">Academics</option>
-          <option value="Events">Events</option>
-          <option value="Finance">Finance</option>
-          <option value="PTA">PTA</option>
-          <option value="Sports">Sports</option>
-        </select>
+      <!-- Multi-select category chips: click to toggle a category on/off.
+           No chips selected (besides "All") means no category restriction. -->
+      <div class="category-chips" role="group" aria-label="Filter by category">
+        <button type="button" class="category-chip is-active" data-category="all">All</button>
+        <button type="button" class="category-chip" data-category="General">General</button>
+        <button type="button" class="category-chip" data-category="Academics">Academics</button>
+        <button type="button" class="category-chip" data-category="Events">Events</button>
+        <button type="button" class="category-chip" data-category="Finance">Finance</button>
+        <button type="button" class="category-chip" data-category="PTA">PTA</button>
+        <button type="button" class="category-chip" data-category="Sports">Sports</button>
+      </div>
+
+      <button
+        type="button"
+        id="advanced-search-toggle"
+        class="advanced-search-toggle"
+        aria-expanded="false"
+        aria-controls="advanced-search-panel"
+      >
+        ▸ Advanced search (date range)
+      </button>
+
+      <div id="advanced-search-panel" class="advanced-search-panel" hidden>
+        <div class="date-field">
+          <label for="date-from">From</label>
+          <input type="date" id="date-from" />
+        </div>
+        <div class="date-field">
+          <label for="date-to">To</label>
+          <input type="date" id="date-to" />
+        </div>
+        <button type="button" id="date-clear" class="date-clear-btn">Clear dates</button>
       </div>
     </section>
 
