@@ -29,8 +29,10 @@ School-Parent-Hub/
 │
 ├── website/
 │   ├── index.html      # Page markup: header, search/filter, cards, modal, footer
-│   ├── style.css        # Material-inspired styling, responsive, accessible
-│   └── app.js            # Fetches JSON API, renders cards, search/filter/modal logic
+│   ├── resources.html   # Static list of class documents (Drive links) — no API involved
+│   ├── style.css          # Material-inspired styling, responsive, accessible
+│   ├── app.js               # Fetches JSON API, renders cards, search/filter/modal logic
+│   └── robots.txt            # Blocks search-engine indexing (site is meant for private sharing)
 │
 ├── apps-script/
 │   └── Code.gs           # Gmail import, categorization, Sheet writer, JSON API
@@ -202,6 +204,12 @@ School-Parent-Hub/
   re-run `setupProject` to recreate it with the new interval.
 - **To update the website's look or behavior**: edit `style.css` / `app.js` /
   `index.html` and push to GitHub — Pages redeploys automatically.
+- **To update the Resources page** (`resources.html`): it's a plain static
+  list, not fetched from anywhere — edit the `<a class="resource-card">`
+  entries directly (name, link, and the emoji/"PDF"/"Slides"/"Folder" type
+  label), then push. When linking a new Google Drive file, first set its
+  sharing to "Anyone with the link" (Drive → Share), otherwise parents will
+  hit a "request access" page instead of the document.
 - **To re-import everything from scratch**: clear all rows below the header
   in the Announcements sheet, then run `importEmails` manually (it will treat
   every labeled email as new since MessageIDs will no longer be present).
