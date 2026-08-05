@@ -206,10 +206,14 @@ School-Parent-Hub/
   `index.html` and push to GitHub — Pages redeploys automatically.
 - **To update the Resources page** (`resources.html`): it's a plain static
   list, not fetched from anywhere — edit the `<a class="resource-card">`
-  entries directly (name, link, and the emoji/"PDF"/"Slides"/"Folder" type
-  label), then push. When linking a new Google Drive file, first set its
-  sharing to "Anyone with the link" (Drive → Share), otherwise parents will
-  hit a "request access" page instead of the document.
+  entries directly (name, link, and the emoji/"PDF"/"Slides"/"Folder"/"Image"
+  type label), then push. Links can point to a Google Drive file (set its
+  sharing to "Anyone with the link" first — Drive → Share — otherwise parents
+  will hit a "request access" page) or to an image/file committed directly
+  into `website/` (e.g. `attendance-procedure.webp`), which loads instantly
+  with no Drive dependency at all. Prefer local files for anything that's
+  meant to be a permanent part of the site; use Drive links for documents
+  the class moderator maintains independently.
 - **To re-import everything from scratch**: clear all rows below the header
   in the Announcements sheet, then run `importEmails` manually (it will treat
   every labeled email as new since MessageIDs will no longer be present).
