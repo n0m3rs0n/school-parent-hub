@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Important Dates — School Parent Information Hub</title>
+  <meta name="description" content="Key dates for the school year for parents." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Applies the saved/system theme before first paint, avoiding a flash
+       of the wrong theme. theme.js (loaded later) only handles the toggle. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">❤️</span>
+        <span class="brand-name">11-Escribano Parent Hub</span>
+      </div>
+      <p class="brand-tagline">Gmail memos, updates &amp; resources, all in one place</p>
+      <nav class="site-nav" aria-label="Site sections">
+        <a href="index.html" class="site-nav-link">Announcements</a>
+        <a href="resources.html" class="site-nav-link">Resources</a>
+        <a href="important-dates.html" class="site-nav-link is-active">Important Dates</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================== MAIN ============================== -->
+  <main class="container">
+
+    <h1 class="page-title">Important Dates to Remember</h1>
+    <p class="page-subtitle">Key dates for SY 2026-27. Bolded dates are especially important — check your email for details closer to each one.</p>
+
+    <!--
+      Static, manually maintained list — no backend/API involved, and not
+      tied to Gmail import. When the school calendar changes, edit this
+      list directly. Use class="is-highlighted" on an <li> for a date that
+      should stand out (matches the bolded/colored dates in the source
+      calendar slides), plain <li> otherwise.
+    -->
+    <ul class="dates-list">
+      <li class="is-highlighted">July 30 (Thu) — Schoolwide Mass Feast of St. Ignatius and Emergency Drill</li>
+      <li>August 11 (Tue) — Misa para sa Banal na Espiritu</li>
+      <li class="is-highlighted">August 18 (Tue) — Mass Sponsorship</li>
+      <li>September 26 (Sat) — PREP-PUSH G11 Parenting Seminar #1</li>
+      <li>September 30 (Wed) — Sem 1 Advisory Marks</li>
+      <li>October 1 (Thu) — Schoolwide Mass &amp; Delaney-Duffy Day (D3)</li>
+      <li>October 7 (Wed) — Online PTC</li>
+      <li class="is-highlighted">October 15 (Thu) – 16 (Fri) — Retreat @ Sacred Heart*</li>
+      <li>October 26 (Mon) – 30 (Fri) — Wellness Break</li>
+      <li>November 10 (Tue) – 12 (Thu) — Grade 11 CarEx</li>
+      <li>November 14 (Sat) – 15 (Sun) — TD Home Visit</li>
+      <li>November 23 (Mon) – 24 (Tue) — Final Exams</li>
+      <li>November 25 (Wed) – 26 (Thu) — Cura Personalis Days</li>
+      <li>November 28 (Sat) — PREP-PUSH G11 Parenting Seminar #2</li>
+      <li class="is-highlighted">December 1 (Tue) — Start of Sem 2 — Online Schola Brevis</li>
+      <li>December 12 (Sat) — Advent Recollection for Parents</li>
+      <li>December 15 (Tue) — Immaculate Conception Themed Mass Sponsor</li>
+      <li class="is-highlighted">December 18 (Fri) — Community Year-end Thanksgiving Mass and Christmas Salu-salo*</li>
+    </ul>
+
+  </main>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script>
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -30,10 +30,11 @@ School-Parent-Hub/
 ├── website/
 │   ├── index.html      # Page markup: header, search/filter, cards, modal, footer
 │   ├── resources.html   # Static list of class documents (Drive links) — no API involved
-│   ├── style.css          # Material-inspired styling, responsive, accessible, light/dark
-│   ├── app.js               # Fetches JSON API, renders cards, search/filter/modal logic
-│   ├── theme.js               # Dark mode toggle, shared by index.html and resources.html
-│   └── robots.txt                # Blocks search-engine indexing (site is meant for private sharing)
+│   ├── important-dates.html # Static school-year calendar list — no API involved
+│   ├── style.css               # Material-inspired styling, responsive, accessible, light/dark
+│   ├── app.js                    # Fetches JSON API, renders cards, search/filter/modal logic
+│   ├── theme.js                    # Dark mode toggle, shared across all three pages
+│   └── robots.txt                     # Blocks search-engine indexing (site is meant for private sharing)
 │
 ├── apps-script/
 │   └── Code.gs           # Gmail import, categorization, Sheet writer, JSON API
@@ -215,6 +216,15 @@ School-Parent-Hub/
   with no Drive dependency at all. Prefer local files for anything that's
   meant to be a permanent part of the site; use Drive links for documents
   the class moderator maintains independently.
+- **To update the Important Dates page** (`important-dates.html`): also a
+  plain static list — edit the `<li>` entries in `.dates-list` directly.
+  Add `class="is-highlighted"` to make a date stand out (matches the
+  bolded/colored dates in the source school calendar), omit it otherwise.
+- **Adding a new page**: copy the `<header>`/nav/`<footer>` block and the
+  two `<script>` tags (inline theme-init + `theme.js`) from an existing
+  page like `important-dates.html`, then add a matching nav link to
+  *all* pages' `site-nav` (including the new one, marked `is-active`) so
+  the tab bar stays consistent everywhere.
 - **To re-import everything from scratch**: clear all rows below the header
   in the Announcements sheet, then run `importEmails` manually (it will treat
   every labeled email as new since MessageIDs will no longer be present).
