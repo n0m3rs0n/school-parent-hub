@@ -23,12 +23,13 @@
   --color-border: #e3e7ef;
   --color-danger: #b91c1c;
 
-  --category-general: #6b7280;
-  --category-academics: #1a56db;
-  --category-events: #7c3aed;
-  --category-finance: #b45309;
-  --category-pta: #be185d;
-  --category-sports: #0e9f6e;
+  /* Per-category colors live in app.js (CONFIG.CATEGORY_COLORS), not
+     here — badges and chips get their color via an inline style computed
+     by Render.categoryColor(), so a category works correctly (with an
+     automatic fallback color) even without a matching CSS rule. Keeping
+     colors in one JS config instead of splitting them across CSS and JS
+     is the whole point of that setup — see the README's "Better category
+     management" note. */
 
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -238,16 +239,11 @@ img {
 .category-chip.is-active {
   color: #fff;
   border-color: transparent;
+  /* --chip-color is set inline by Render.buildCategoryChips() per category
+     (see app.js); the static "All" chip has no --chip-color, so it falls
+     back to the neutral muted color below. */
+  background-color: var(--chip-color, var(--color-text-muted));
 }
-
-/* Reuse the same per-category colors as the card badges when active. */
-.category-chip.is-active[data-category="all"] { background-color: var(--color-text-muted); }
-.category-chip.is-active[data-category="General"] { background-color: var(--category-general); }
-.category-chip.is-active[data-category="Academics"] { background-color: var(--category-academics); }
-.category-chip.is-active[data-category="Events"] { background-color: var(--category-events); }
-.category-chip.is-active[data-category="Finance"] { background-color: var(--category-finance); }
-.category-chip.is-active[data-category="PTA"] { background-color: var(--category-pta); }
-.category-chip.is-active[data-category="Sports"] { background-color: var(--category-sports); }
 
 /* ---------- Advanced search (date range) ---------- */
 .advanced-search-toggle {
@@ -479,13 +475,6 @@ img {
   color: #fff;
   white-space: nowrap;
 }
-
-.badge--general   { background-color: var(--category-general); }
-.badge--academics { background-color: var(--category-academics); }
-.badge--events    { background-color: var(--category-events); }
-.badge--finance   { background-color: var(--category-finance); }
-.badge--pta       { background-color: var(--category-pta); }
-.badge--sports    { background-color: var(--category-sports); }
 
 /* ---------- Modal ---------- */
 .modal-overlay {

@@ -109,6 +109,13 @@ const COLUMNS = [
 // and checked against the combined subject + body text of each email.
 // Order matters only in that the FIRST category with a keyword hit wins,
 // so put more specific categories before more general ones if needed.
+//
+// To add a brand-new category, just add a key here — no other file needs
+// to change. The website (app.js) builds its category filter chips from
+// whatever categories actually show up in the data, and auto-assigns any
+// category without an explicit entry in CONFIG.CATEGORY_COLORS a
+// deterministic fallback color. Add an entry there too if you want to
+// pick that new category's color yourself instead of the automatic one.
 const CATEGORY_KEYWORDS = {
   Finance: ['tuition', 'payment', 'invoice', 'fee', 'fees', 'balance due', 'billing', 'refund'],
   PTA: ['pta', 'parent teacher association', 'volunteer', 'fundraiser', 'fundraising'],

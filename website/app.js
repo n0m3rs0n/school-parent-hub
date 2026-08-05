@@ -18,15 +18,28 @@ const CONFIG = {
   // "https://script.google.com/macros/s/XXXXXXXXXXXX/exec"
   API_URL: 'https://script.google.com/macros/s/AKfycbyYdXjGYBGFw1PrFbB3-84iFNaYM6rok0818TTyEPL60ObYHBH0z6YQx7vTAzNOgusK/exec',
 
-  // Maps category names to the CSS badge modifier class.
-  CATEGORY_BADGE_CLASS: {
-    General: 'badge--general',
-    Academics: 'badge--academics',
-    Events: 'badge--events',
-    Finance: 'badge--finance',
-    PTA: 'badge--pta',
-    Sports: 'badge--sports'
+  // Explicit color for known categories. To customize a category's color,
+  // or add a brand-new category, just add/edit an entry here — nothing
+  // else in this file, index.html, or style.css needs to change. Category
+  // chips and card badges are both generated dynamically from whatever
+  // categories actually appear in the fetched data (see Render.categoryColor
+  // and Render.buildCategoryChips), so a category doesn't even need an
+  // entry here to work — see CATEGORY_FALLBACK_PALETTE below.
+  CATEGORY_COLORS: {
+    General: '#6b7280',
+    Academics: '#1a56db',
+    Events: '#7c3aed',
+    Finance: '#b45309',
+    PTA: '#be185d',
+    Sports: '#0e9f6e'
   },
+
+  // Color for any category NOT listed in CATEGORY_COLORS above (e.g. a
+  // brand-new category added on the Apps Script side that nobody's
+  // assigned a color to yet). Picked deterministically from the category
+  // name so the same unlisted category always gets the same color, both
+  // within a session and across future visits.
+  CATEGORY_FALLBACK_PALETTE: ['#0891b2', '#c2410c', '#4d7c0f', '#9333ea', '#be123c', '#0d9488'],
 
   // Announcements shown per page. All filtering/searching still happens
   // across the full fetched dataset — only rendering is paginated.
@@ -56,7 +69,7 @@ const dom = {
   errorMessage: document.getElementById('error-message'),
   resultCount: document.getElementById('result-count'),
   searchInput: document.getElementById('search-input'),
-  categoryChips: document.querySelectorAll('.category-chip'),
+  categoryChips: document.getElementById('category-chips'),
   advancedSearchToggle: document.getElementById('advanced-search-toggle'),
   advancedSearchPanel: document.getElementById('advanced-search-panel'),
   dateFrom: document.getElementById('date-from'),
@@ -173,14 +186,14 @@ const Render = {
     const card = document.createElement('article');
     card.className = 'card';
 
-    const badgeClass = CONFIG.CATEGORY_BADGE_CLASS[item.category] || 'badge--general';
+    const badgeColor = Render.categoryColor(item.category);
 
     card.innerHTML = `
       <div class="card-header">
         <h3 class="card-title">${Render.escapeHtml(item.title)}</h3>
         <p class="card-date">${Render.formatDate(item.date)}</p>
       </div>
-      <span class="badge ${badgeClass}">${Render.escapeHtml(item.category)}</span>
+      <span class="badge" style="background-color: ${badgeColor}">${Render.escapeHtml(item.category)}</span>
       <p class="card-summary">${Render.escapeHtml(item.summary)}</p>
       <div class="card-footer">
         <button class="read-more-btn" data-index="${index}">Read More →</button>
@@ -188,6 +201,24 @@ const Render = {
     `;
 
     return card;
+  },
+
+  /**
+   * Resolves a category name to a display color: an explicit entry in
+   * CONFIG.CATEGORY_COLORS if one exists, otherwise a color picked
+   * deterministically from CONFIG.CATEGORY_FALLBACK_PALETTE based on the
+   * category name, so any category works without needing a config edit,
+   * and repeat visits/renders always get the same color for that name.
+   */
+  categoryColor(category) {
+    if (CONFIG.CATEGORY_COLORS[category]) return CONFIG.CATEGORY_COLORS[category];
+
+    let hash = 0;
+    for (let i = 0; i < category.length; i++) {
+      hash = (hash * 31 + category.charCodeAt(i)) >>> 0;
+    }
+    const palette = CONFIG.CATEGORY_FALLBACK_PALETTE;
+    return palette[hash % palette.length];
   },
 
   /** Updates the "N announcements found" status line. */
@@ -286,11 +317,31 @@ const Render = {
     return item;
   },
 
+  /**
+   * Builds one chip per distinct category found in the fetched data
+   * (alongside the "All" chip already in the HTML), each colored via
+   * Render.categoryColor. Called once after data loads — the "All" chip
+   * is the only one that's static markup.
+   */
+  buildCategoryChips() {
+    const categories = [...new Set(state.allAnnouncements.map((item) => item.category))].sort();
+
+    categories.forEach((category) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'category-chip';
+      chip.dataset.category = category;
+      chip.textContent = category;
+      chip.style.setProperty('--chip-color', Render.categoryColor(category));
+      dom.categoryChips.appendChild(chip);
+    });
+  },
+
   /** Syncs each category chip's active state with state.selectedCategories. */
-  categoryChips() {
+  syncCategoryChips() {
     const noneSelected = state.selectedCategories.size === 0;
 
-    dom.categoryChips.forEach((chip) => {
+    dom.categoryChips.querySelectorAll('.category-chip').forEach((chip) => {
       const isAll = chip.dataset.category === 'all';
       const isActive = isAll ? noneSelected : state.selectedCategories.has(chip.dataset.category);
       chip.classList.toggle('is-active', isActive);
@@ -493,9 +544,9 @@ const Modal = {
     dom.modalTitle.textContent = item.title;
     dom.modalDate.textContent = Render.formatDate(item.date);
 
-    const badgeClass = CONFIG.CATEGORY_BADGE_CLASS[item.category] || 'badge--general';
     dom.modalCategory.textContent = item.category;
-    dom.modalCategory.className = `badge ${badgeClass}`;
+    dom.modalCategory.className = 'badge';
+    dom.modalCategory.style.backgroundColor = Render.categoryColor(item.category);
 
     dom.modalBody.innerHTML = '';
     if (item.bodyHtml) {
@@ -543,7 +594,7 @@ function handleCategoryChipClick(event) {
     }
   }
 
-  Render.categoryChips();
+  Render.syncCategoryChips();
   Filters.apply();
   Render.announcements();
 }
@@ -605,7 +656,7 @@ async function init() {
   dom.footerYear.textContent = new Date().getFullYear();
 
   dom.searchInput.addEventListener('input', handleSearchInput);
-  dom.categoryChips.forEach((chip) => chip.addEventListener('click', handleCategoryChipClick));
+  dom.categoryChips.addEventListener('click', handleCategoryChipClick);
   dom.advancedSearchToggle.addEventListener('click', handleAdvancedSearchToggle);
   dom.dateFrom.addEventListener('change', handleDateChange);
   dom.dateTo.addEventListener('change', handleDateChange);
@@ -622,6 +673,7 @@ async function init() {
   try {
     const data = await Api.fetchAnnouncements();
     state.allAnnouncements = Array.isArray(data) ? data : [];
+    Render.buildCategoryChips();
     Filters.apply();
     Render.hideLoading();
     Render.announcements();

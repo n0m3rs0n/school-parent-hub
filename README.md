@@ -290,12 +290,22 @@ without major rewrites.
   All three filters (text, categories, dates) combine with AND logic in
   `Filters.apply()`. "Sender" was intentionally left out — the public API
   never exposes sender email, by the Phase 1 privacy design.
+- ✅ Better category management: category colors used to be split across
+  `Code.gs` keyword lists, `app.js`, hardcoded HTML chips, and per-category
+  CSS classes — four places to touch for one new category. Now there's a
+  single `CONFIG.CATEGORY_COLORS` map in `app.js` for explicit colors, a
+  `CATEGORY_FALLBACK_PALETTE` that deterministically colors any category
+  without an entry there, and category chips/badges are both generated
+  dynamically (`Render.buildCategoryChips`, `Render.categoryColor`) from
+  whatever categories actually appear in the fetched data. Adding a
+  category now means editing `CATEGORY_KEYWORDS` in `Code.gs` — nothing
+  else needs to change, though `CATEGORY_COLORS` is there if you want to
+  pick its color yourself instead of the automatic one.
 
 **Phase 2 — Not Yet Built**
 - Monthly archive view
 - Print announcement
 - Share button
-- Better category management (custom categories, per-category colors config)
 
 **Phase 3**
 - Admin dashboard

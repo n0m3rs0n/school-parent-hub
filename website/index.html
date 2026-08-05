@@ -53,15 +53,13 @@
       </div>
 
       <!-- Multi-select category chips: click to toggle a category on/off.
-           No chips selected (besides "All") means no category restriction. -->
-      <div class="category-chips" role="group" aria-label="Filter by category">
+           No chips selected (besides "All") means no category restriction.
+           The "All" chip is the only one hardcoded — the rest are built by
+           Render.buildCategoryChips() from whatever categories actually
+           appear in the fetched data, so a brand-new category shows up
+           automatically with no HTML changes needed. -->
+      <div id="category-chips" class="category-chips" role="group" aria-label="Filter by category">
         <button type="button" class="category-chip is-active" data-category="all">All</button>
-        <button type="button" class="category-chip" data-category="General">General</button>
-        <button type="button" class="category-chip" data-category="Academics">Academics</button>
-        <button type="button" class="category-chip" data-category="Events">Events</button>
-        <button type="button" class="category-chip" data-category="Finance">Finance</button>
-        <button type="button" class="category-chip" data-category="PTA">PTA</button>
-        <button type="button" class="category-chip" data-category="Sports">Sports</button>
       </div>
 
       <button
