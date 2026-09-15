@@ -158,6 +158,15 @@ img {
   display: flex;
   gap: 16px;
   margin-top: 12px;
+  /* Scrolls horizontally instead of wrapping to a second line once there
+     are too many tabs to fit — keeps the header a fixed height on
+     mobile regardless of how many nav links exist. */
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.site-nav::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .site-nav-link {
@@ -167,6 +176,8 @@ img {
   font-weight: 600;
   padding-bottom: 4px;
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .site-nav-link:hover,
