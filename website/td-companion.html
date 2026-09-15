@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TD Companion — School Parent Information Hub</title>
+  <meta name="description" content="TD Tutoring adult companion sign-up schedule." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Applies the saved/system theme before first paint, avoiding a flash
+       of the wrong theme. theme.js (loaded later) only handles the toggle. -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">❤️</span>
+        <span class="brand-name">11-Escribano Parent Hub</span>
+      </div>
+      <p class="brand-tagline">Gmail memos, updates &amp; resources, all in one place</p>
+      <nav class="site-nav" aria-label="Site sections">
+        <a href="index.html" class="site-nav-link">Announcements</a>
+        <a href="resources.html" class="site-nav-link">Resources</a>
+        <a href="important-dates.html" class="site-nav-link">Important Dates</a>
+        <a href="td-companion.html" class="site-nav-link is-active">TD Companion</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================== MAIN ============================== -->
+  <main class="container">
+
+    <h1 class="page-title">TD Companion Schedule</h1>
+    <p class="page-subtitle">
+      Tuesday TD Tutoring at Hermogenes Bautista Elementary School.
+      This list is pulled live from the sign-up sheet, so it's always current.
+    </p>
+
+    <a
+      class="signup-link-btn"
+      href="https://docs.google.com/spreadsheets/d/1LTM3jBpo1aedZaiYHtKJmwjEY7KOimqVZ82frZRNTE4/edit?usp=sharing"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      📝 Open the Sign-Up Sheet
+    </a>
+
+    <!-- Loading indicator -->
+    <div id="td-loading" class="loading-indicator" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading schedule...</p>
+    </div>
+
+    <!-- Error message -->
+    <div id="td-error" class="error-message" hidden>
+      <p>Couldn't load the live schedule right now. Use the sign-up sheet link above to view it directly.</p>
+    </div>
+
+    <!-- Populated by td-companion.js once the sheet loads -->
+    <section id="td-open-section" class="td-open-section" hidden>
+      <h2 class="td-section-title">📋 Dates Needing a Companion</h2>
+      <ul id="td-open-list" class="td-open-list"></ul>
+    </section>
+
+    <section id="td-schedule-section" hidden>
+      <h2 class="td-section-title">Full Schedule</h2>
+      <ul id="td-schedule-list" class="td-schedule-list"></ul>
+    </section>
+
+  </main>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script>
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+  <script src="td-companion.js"></script>
+</body>
+</html>

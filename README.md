@@ -31,10 +31,12 @@ School-Parent-Hub/
 │   ├── index.html      # Page markup: header, search/filter, cards, modal, footer
 │   ├── resources.html   # Static list of class documents (Drive links) — no API involved
 │   ├── important-dates.html # Static school-year calendar list — no API involved
-│   ├── style.css               # Material-inspired styling, responsive, accessible, light/dark
-│   ├── app.js                    # Fetches JSON API, renders cards, search/filter/modal logic
-│   ├── theme.js                    # Dark mode toggle, shared across all three pages
-│   └── robots.txt                     # Blocks search-engine indexing (site is meant for private sharing)
+│   ├── td-companion.html      # TD Tutoring sign-up schedule — LIVE from a Google Sheet
+│   ├── style.css                 # Material-inspired styling, responsive, accessible, light/dark
+│   ├── app.js                      # Fetches JSON API, renders cards, search/filter/modal logic
+│   ├── theme.js                      # Dark mode toggle, shared across all four pages
+│   ├── td-companion.js                 # Fetches/parses the TD sign-up sheet (see Section 6)
+│   └── robots.txt                         # Blocks search-engine indexing (site is meant for private sharing)
 │
 ├── apps-script/
 │   └── Code.gs           # Gmail import, categorization, Sheet writer, JSON API
@@ -231,6 +233,27 @@ School-Parent-Hub/
   page like `important-dates.html`, then add a matching nav link to
   *all* pages' `site-nav` (including the new one, marked `is-active`) so
   the tab bar stays consistent everywhere.
+- **To update the TD Companion page** (`td-companion.html`, `td-companion.js`):
+  unlike Resources/Important Dates, this one is NOT a static snapshot —
+  it fetches the sign-up Google Sheet live on every page load, since a
+  cached "OPEN" slot would be actively misleading the moment someone
+  signs up. It reads Google's public gviz JSON feed for the sheet via a
+  JSONP `<script>` tag (`fetch()` doesn't work here — the endpoint sends
+  no CORS header, so a browser blocks reading the response; script-tag
+  loading isn't subject to that restriction, which is exactly why Google
+  formats the response as a JS call instead of plain JSON). The parser
+  finds the header row by content (first cell === `"Date"`) rather than
+  a fixed row number, then reads rows until one stops looking like a
+  date — so inserting a row in the sheet doesn't break it, but adding a
+  *column*, renaming "OPEN"/"TBC", or replacing the sheet with a
+  differently-shaped one will need matching changes in `Schedule.parse`/
+  `Schedule.statusFor`. `CONFIG.SHEET_ID` in `td-companion.js` and the
+  sign-up link's `href` in `td-companion.html` both need updating
+  together if the sheet is ever swapped for a different one. Contact
+  number and relation-to-student columns exist in the sheet but are
+  deliberately not displayed on the public page — only date, activity,
+  and companion name, matching what was asked for and keeping other
+  parents' phone numbers off a page with a public URL.
 - **To re-import everything from scratch**: clear all rows below the header
   in the Announcements sheet, then run `importEmails` manually (it will treat
   every labeled email as new since MessageIDs will no longer be present).

@@ -751,6 +751,149 @@ img {
   opacity: 0.55;
 }
 
+/* ---------- TD Companion page ---------- */
+.signup-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 20px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+}
+
+.signup-link-btn:hover,
+.signup-link-btn:focus {
+  background-color: var(--color-primary-dark);
+}
+
+.td-section-title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  color: var(--color-text);
+}
+
+.td-open-section {
+  margin-bottom: 32px;
+  padding: 16px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+}
+
+.td-open-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.td-open-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.td-open-date {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.td-open-activity {
+  color: var(--color-text-muted);
+  flex-grow: 1;
+}
+
+.td-open-signup {
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.td-open-signup:hover,
+.td-open-signup:focus {
+  text-decoration: underline;
+}
+
+.td-schedule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.td-schedule-item {
+  padding: 12px 16px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.td-schedule-item.is-passed {
+  opacity: 0.55;
+}
+
+.td-schedule-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.td-schedule-date {
+  font-weight: 600;
+  color: var(--color-text);
+  min-width: 150px;
+}
+
+.td-schedule-activity {
+  color: var(--color-text-muted);
+  flex-grow: 1;
+}
+
+.td-schedule-remarks {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.td-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.td-badge--filled {
+  background-color: var(--color-accent);
+  color: #fff;
+}
+
+.td-badge--open {
+  background-color: var(--color-danger);
+  color: #fff;
+}
+
+.td-badge--tbc {
+  background-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
 /* ---------- Footer ---------- */
 .site-footer {
   text-align: center;
