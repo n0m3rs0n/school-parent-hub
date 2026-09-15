@@ -220,6 +220,12 @@ School-Parent-Hub/
   plain static list — edit the `<li>` entries in `.dates-list` directly.
   Add `class="is-highlighted"` to make a date stand out (matches the
   bolded/colored dates in the source school calendar), omit it otherwise.
+  Also set `data-date="yyyy-mm-dd"` (or `data-end-date` on a multi-day
+  entry — use the *last* day of the range) matching the visible text; a
+  small script at the bottom of the page compares it to today on every
+  load and automatically strikes through anything already past — there's
+  nothing to update by hand as the school year progresses, just keep
+  that attribute in sync whenever you add or edit a date.
 - **Adding a new page**: copy the `<header>`/nav/`<footer>` block and the
   two `<script>` tags (inline theme-init + `theme.js`) from an existing
   page like `important-dates.html`, then add a matching nav link to
