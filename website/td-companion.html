@@ -66,14 +66,12 @@
       <p>Couldn't load the live schedule right now. Use the sign-up sheet link above to view it directly.</p>
     </div>
 
-    <!-- Populated by td-companion.js once the sheet loads -->
-    <section id="td-open-section" class="td-open-section" hidden>
-      <h2 class="td-section-title">📋 Dates Needing a Companion</h2>
-      <ul id="td-open-list" class="td-open-list"></ul>
-    </section>
-
+    <!-- Populated by td-companion.js once the sheet loads. One
+         chronological list — OPEN rows are visually flagged (colored
+         border + badge) and carry their own "Sign up" link, instead of
+         also being repeated in a separate callout above. -->
     <section id="td-schedule-section" hidden>
-      <h2 class="td-section-title">Full Schedule</h2>
+      <h2 class="td-section-title">Schedule</h2>
       <ul id="td-schedule-list" class="td-schedule-list"></ul>
     </section>
 

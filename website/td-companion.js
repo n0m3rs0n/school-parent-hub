@@ -3,12 +3,14 @@
  * TD COMPANION SCHEDULE — Front-end logic
  * ============================================================================
  * Reads the TD Tutoring sign-up sheet LIVE (via Google's public gviz JSON
- * feed) and renders it as a schedule with a highlighted "needs a companion"
- * section. Unlike resources.html/important-dates.html, this page is
+ * feed) and renders it as a single chronological schedule. OPEN rows get a
+ * colored border and their own inline "Sign up" link instead of being
+ * repeated in a separate callout — one list, not two showing the same
+ * dates. Unlike resources.html/important-dates.html, this page is
  * intentionally NOT a static snapshot: it's a sign-up tracker, so showing
- * stale "OPEN" slots after someone has already signed up would be actively
- * misleading. There's no backend involved — Google Sheets' own gviz
- * endpoint is fetched directly from the browser.
+ * a stale "OPEN" slot after someone has already signed up would be
+ * actively misleading. There's no backend involved — Google Sheets' own
+ * gviz endpoint is fetched directly from the browser.
  *
  * WHY JSONP INSTEAD OF fetch(): the gviz endpoint doesn't send an
  * Access-Control-Allow-Origin header, so a same-origin-policy fetch() call
@@ -29,8 +31,6 @@ const CONFIG = {
 const dom = {
   loading: document.getElementById('td-loading'),
   error: document.getElementById('td-error'),
-  openSection: document.getElementById('td-open-section'),
-  openList: document.getElementById('td-open-list'),
   scheduleSection: document.getElementById('td-schedule-section'),
   scheduleList: document.getElementById('td-schedule-list')
 };
@@ -156,39 +156,27 @@ const Render = {
     return div.innerHTML;
   },
 
-  /** The "needs a companion" callout — only upcoming OPEN dates. */
-  openDates(entries) {
-    const openUpcoming = entries.filter((e) => e.status === 'open' && !Schedule.isPast(e.date));
-
-    if (openUpcoming.length === 0) {
-      dom.openSection.hidden = true;
-      return;
-    }
-
-    dom.openSection.hidden = false;
-    dom.openList.innerHTML = openUpcoming.map((e) => `
-      <li class="td-open-item">
-        <span class="td-open-date">${Render.formatDate(e.date)}</span>
-        <span class="td-open-activity">${Render.escapeHtml(e.activity)}</span>
-        <a class="td-open-signup" href="${CONFIG.SIGNUP_URL}" target="_blank" rel="noopener noreferrer">Sign up →</a>
-      </li>
-    `).join('');
-  },
-
-  /** The full schedule, in sheet order, with a status badge per row. */
+  /**
+   * The full schedule, in sheet order, with a status badge per row.
+   * Upcoming OPEN rows get a colored left border (via is-open) and their
+   * own inline "Sign up" link — no separate callout repeating the same
+   * dates elsewhere on the page.
+   */
   fullSchedule(entries) {
     dom.scheduleSection.hidden = false;
     dom.scheduleList.innerHTML = entries.map((e) => {
-      const passedClass = Schedule.isPast(e.date) ? ' is-passed' : '';
+      const passed = Schedule.isPast(e.date);
+      const isOpenUpcoming = e.status === 'open' && !passed;
+      const itemClass = 'td-schedule-item' + (passed ? ' is-passed' : '') + (isOpenUpcoming ? ' is-open' : '');
+
       return `
-        <li class="td-schedule-item${passedClass}">
+        <li class="${itemClass}">
           <div class="td-schedule-main">
             <span class="td-schedule-date">${Render.formatDate(e.date)}</span>
             <span class="td-schedule-activity">${Render.escapeHtml(e.activity)}</span>
             ${Render.statusBadge(e)}
           </div>
-          ${e.remarks && e.status !== 'note' ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
-          ${e.status === 'note' && e.remarks ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
+          ${e.remarks ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
         </li>
       `;
     }).join('');
@@ -199,7 +187,10 @@ const Render = {
       return `<span class="td-badge td-badge--filled">${Render.escapeHtml(entry.companion)}</span>`;
     }
     if (entry.status === 'open') {
-      return '<span class="td-badge td-badge--open">OPEN</span>';
+      const signupLink = !Schedule.isPast(entry.date)
+        ? `<a class="td-open-signup" href="${CONFIG.SIGNUP_URL}" target="_blank" rel="noopener noreferrer">Sign up →</a>`
+        : '';
+      return `<span class="td-badge td-badge--open">OPEN</span>${signupLink}`;
     }
     if (entry.status === 'tbc') {
       return '<span class="td-badge td-badge--tbc">To be confirmed</span>';
@@ -236,7 +227,6 @@ async function init() {
 
     const entries = Schedule.parse(response);
     Render.hideLoading();
-    Render.openDates(entries);
     Render.fullSchedule(entries);
   } catch (error) {
     console.error('Failed to load TD schedule:', error);
