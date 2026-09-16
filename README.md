@@ -241,10 +241,20 @@ School-Parent-Hub/
   JSONP `<script>` tag (`fetch()` doesn't work here — the endpoint sends
   no CORS header, so a browser blocks reading the response; script-tag
   loading isn't subject to that restriction, which is exactly why Google
-  formats the response as a JS call instead of plain JSON). The parser
-  finds the header row by content (first cell === `"Date"`) rather than
-  a fixed row number, then reads rows until one stops looking like a
-  date — so inserting a row in the sheet doesn't break it, but adding a
+  formats the response as a JS call instead of plain JSON). The URL also
+  forces `headers=0`: without it, gviz tries to auto-detect how many
+  rows at the top are "headers" by checking type-consistency down each
+  column, and that guess can silently SHIFT as the sheet fills in (this
+  actually happened — a parent's phone number landing in the Contact #
+  column made gviz swallow every row before it, real header included,
+  into decorative column labels instead of `table.rows`, which broke
+  the page with no sheet structure actually changing). `headers=0` makes
+  every row always land in `table.rows`, so `Schedule.parse`'s own
+  header-row detection is the only thing that decides what's real data.
+  The parser finds the header row by content (first cell === `"Date"`)
+  rather than a fixed row number, then reads rows until one stops
+  looking like a date — so inserting a row in the sheet doesn't break
+  it, but adding a
   *column*, renaming "OPEN"/"TBC", or replacing the sheet with a
   differently-shaped one will need matching changes in `Schedule.parse`/
   `Schedule.statusFor`. `CONFIG.SHEET_ID` in `td-companion.js` and the

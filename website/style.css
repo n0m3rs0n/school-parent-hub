@@ -350,6 +350,23 @@ img {
   color: var(--color-danger);
 }
 
+.td-retry-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.td-retry-btn:hover,
+.td-retry-btn:focus {
+  background-color: var(--color-primary-dark);
+}
+
 /* ---------- Announcement grid & cards ---------- */
 .announcements-grid {
   display: grid;

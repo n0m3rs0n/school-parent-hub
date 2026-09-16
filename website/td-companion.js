@@ -25,12 +25,17 @@
 const CONFIG = {
   SHEET_ID: '1LTM3jBpo1aedZaiYHtKJmwjEY7KOimqVZ82frZRNTE4',
   SIGNUP_URL: 'https://docs.google.com/spreadsheets/d/1LTM3jBpo1aedZaiYHtKJmwjEY7KOimqVZ82frZRNTE4/edit?usp=sharing',
-  JSONP_TIMEOUT_MS: 10000
+  // Generous on purpose: a phone on a weak mobile signal can take a while
+  // to complete this request, and there's no cost to waiting longer
+  // before giving up versus showing an error a slow connection would've
+  // recovered from a few seconds later.
+  JSONP_TIMEOUT_MS: 20000
 };
 
 const dom = {
   loading: document.getElementById('td-loading'),
   error: document.getElementById('td-error'),
+  retry: document.getElementById('td-retry'),
   scheduleSection: document.getElementById('td-schedule-section'),
   scheduleList: document.getElementById('td-schedule-list')
 };
@@ -73,8 +78,17 @@ const Jsonp = {
         reject(new Error('Failed to load the sheet.'));
       };
 
+      // headers=0 disables gviz's own automatic header-row guessing. That
+      // guess is based on data-type consistency down each column, and it
+      // silently SHIFTED after a real sign-up (a phone number landed in
+      // the Contact # column), which made gviz swallow every earlier row
+      // — the real header included — into decorative column labels
+      // instead of table.rows. Schedule.parse() already finds the real
+      // header row itself by content, so gviz's own guessing was never
+      // needed; forcing headers=0 makes every row land in table.rows
+      // every time, regardless of what the data looks like.
       const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
-        '/gviz/tq?tqx=responseHandler:' + callbackName;
+        '/gviz/tq?headers=0&tqx=responseHandler:' + callbackName;
       script.src = url;
       document.head.appendChild(script);
     });
@@ -234,4 +248,5 @@ async function init() {
   }
 }
 
+dom.retry.addEventListener('click', init);
 document.addEventListener('DOMContentLoaded', init);
