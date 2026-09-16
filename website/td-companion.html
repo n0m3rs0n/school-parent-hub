@@ -87,6 +87,9 @@
   <script>
     document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>
-  <script src="td-companion.js"></script>
+  <!-- ?v= is a manual cache-buster: bump it whenever td-companion.js
+       changes, so a visitor's browser can't keep running old cached JS
+       for up to 10 minutes after a fix ships (see README). -->
+  <script src="td-companion.js?v=2"></script>
 </body>
 </html>

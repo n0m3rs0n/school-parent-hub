@@ -263,7 +263,13 @@ School-Parent-Hub/
   number and relation-to-student columns exist in the sheet but are
   deliberately not displayed on the public page — only date, activity,
   and companion name, matching what was asked for and keeping other
-  parents' phone numbers off a page with a public URL.
+  parents' phone numbers off a page with a public URL. `td-companion.js`
+  is loaded with a manual cache-buster (`<script src="td-companion.js?v=2">`
+  in `td-companion.html`) — GitHub Pages caches static files for up to
+  10 minutes, so without this a visitor's browser could keep running old
+  JS for a while after a real fix ships. **Bump the `?v=` number every
+  time you edit `td-companion.js`** so returning visitors actually get
+  the update instead of a stale cached copy.
 - **To re-import everything from scratch**: clear all rows below the header
   in the Announcements sheet, then run `importEmails` manually (it will treat
   every labeled email as new since MessageIDs will no longer be present).
