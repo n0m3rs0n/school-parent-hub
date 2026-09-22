@@ -878,7 +878,7 @@ img {
 
 .td-badge--filled {
   background-color: var(--color-accent);
-  color: #fff;
+  color: #000;
 }
 
 .td-badge--open {
