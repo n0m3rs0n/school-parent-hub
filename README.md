@@ -208,6 +208,13 @@ School-Parent-Hub/
   re-run `setupProject` to recreate it with the new interval.
 - **To update the website's look or behavior**: edit `style.css` / `app.js` /
   `index.html` and push to GitHub — Pages redeploys automatically.
+  **After editing `style.css` specifically, bump the `?v=` number on its
+  `<link>` tag in all four HTML pages** (currently `style.css?v=1`) —
+  GitHub Pages caches static files for up to 10 minutes, and since
+  every page shares this one stylesheet, a stale cached copy on a
+  returning visitor's phone/browser can make a real, already-deployed
+  CSS fix look like it "didn't work" for a while after shipping. Same
+  reasoning as `td-companion.js`'s own `?v=` below, just site-wide.
 - **To update the Resources page** (`resources.html`): it's a plain static
   list, not fetched from anywhere — edit the `<a class="resource-card">`
   entries directly (name, link, and the emoji/"PDF"/"Slides"/"Folder"/"Image"
