@@ -1464,14 +1464,202 @@ button {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  padding: 0 var(--s-4);
+  border: 1.5px solid var(--warm);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--warm-text);
-  text-decoration: none;
+  cursor: pointer;
   white-space: nowrap;
 }
 
 .td-open-signup:hover {
-  text-decoration: underline;
+  background: var(--warm);
+  color: var(--warm-ink);
+}
+
+.td-open-signup:focus-visible,
+.signup-dialog :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Sign-up dialog (bottom sheet on phones, centered card on wide) ---------- */
+.signup-dialog {
+  width: min(460px, calc(100vw - 2 * var(--gutter)));
+  max-height: calc(100dvh - 2 * var(--s-5));
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  box-shadow: 0 18px 48px rgba(20, 24, 32, 0.22);
+}
+
+.signup-dialog::backdrop {
+  background: var(--overlay);
+}
+
+.signup-form,
+.signup-done {
+  padding: var(--s-5);
+}
+
+.signup-head {
+  position: relative;
+  padding-right: 44px;
+  margin-bottom: var(--s-4);
+}
+
+.signup-head .eyebrow {
+  margin: 0 0 var(--s-1);
+}
+
+.signup-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.signup-when {
+  margin: var(--s-1) 0 0;
+  color: var(--warm-text);
+  font-weight: 600;
+}
+
+.signup-close {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.signup-close:hover { color: var(--text); background: var(--surface-2); }
+
+.signup-field {
+  margin-bottom: var(--s-4);
+}
+
+.signup-field label {
+  display: block;
+  margin-bottom: var(--s-1);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.signup-field .req { color: var(--danger); }
+
+.signup-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem; /* 16px keeps iOS from zooming */
+}
+
+.signup-field input[aria-invalid="true"] {
+  border-color: var(--danger);
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+
+.signup-hint {
+  margin: var(--s-1) 0 0;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.signup-err {
+  margin: var(--s-1) 0 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.signup-err:empty,
+.signup-status:empty { display: none; }
+
+.signup-consent {
+  margin: 0 0 var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  border-left: 2px solid var(--accent);
+  background: var(--surface-2);
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+.signup-status {
+  margin: 0 0 var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  border-left: 2px solid var(--warm);
+  background: var(--warm-tint);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.signup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-3);
+}
+
+.signup-cancel,
+.signup-submit {
+  min-height: 44px;
+  padding: 0 var(--s-5);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-cancel {
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--text);
+}
+
+.signup-submit {
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.signup-submit:disabled { opacity: 0.7; cursor: progress; }
+
+.signup-done-text { margin: var(--s-3) 0 var(--s-5); line-height: 1.55; }
+
+@media (max-width: 599px) {
+  .signup-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto 0 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .signup-actions > * { flex: 1; }
 }
 
 /* Upcoming OPEN row: warm rule + tint behind the date block. */

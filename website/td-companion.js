@@ -20,7 +20,7 @@
 
 const CONFIG = {
   // Same Apps Script Web App /exec URL as API_URL in app.js.
-  API_URL: 'https://script.google.com/macros/s/AKfycbzUgDesUEX7Ib1RHecz6kmwzpUgBt5aSxcj50su6c5K1tKph-1xfNzcYMw-5JANGom2/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbzUmvkn-zgl4W9gpiv522UHT5vRCblZGvBvSq_QKPYLHOdr5EdCrMk4Kqy6n9eqRzrD/exec',
 
   // Must match Script Property HUB_KEY in Apps Script (same value as in
   // app.js). Visible to anyone who views source — it's a speed bump
@@ -59,6 +59,30 @@ const dom = {
 const Api = {
   signupConfigured() {
     return /^https:\/\//.test(CONFIG.SIGNUP_FORM_URL);
+  },
+
+  /** POSTs a sign-up. text/plain body = no CORS preflight (Apps Script can't answer one). */
+  async signup(date, name, mobile) {
+    if (USE_MOCK) {
+      await new Promise((r) => setTimeout(r, 600));
+      if (/^taken\b/i.test(name)) return { ok: false, error: 'taken' }; // mock test hook
+      return { ok: true, date, name };
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'td_signup', k: CONFIG.HUB_KEY, date, name, mobile }),
+        redirect: 'follow',
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
   },
 
   async fetchSchedule() {
@@ -133,6 +157,11 @@ const Render = {
     return date.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
   },
 
+  isoDate(date) {
+    const p = (n) => String(n).padStart(2, '0');
+    return date.getFullYear() + '-' + p(date.getMonth() + 1) + '-' + p(date.getDate());
+  },
+
   escapeHtml(value) {
     const div = document.createElement('div');
     div.textContent = value == null ? '' : String(value);
@@ -146,14 +175,9 @@ const Render = {
   },
 
   signupCta() {
-    if (Api.signupConfigured()) {
-      dom.signupBtn.href = CONFIG.SIGNUP_FORM_URL;
-      dom.signupBtn.hidden = false;
-      dom.signupPending.hidden = true;
-    } else {
-      dom.signupBtn.hidden = true;
-      dom.signupPending.hidden = false;
-    }
+    // In-page sign-up replaced the external form: always show the hint.
+    if (dom.signupBtn) dom.signupBtn.hidden = true;
+    if (dom.signupPending) dom.signupPending.hidden = false;
   },
 
   /** Short parts for the visual day/month block (the full date stays in
@@ -201,8 +225,8 @@ const Render = {
       return `<span class="td-badge td-badge--filled">${Render.escapeHtml(entry.companion)}</span>`;
     }
     if (entry.status === 'open') {
-      const signupLink = !Schedule.isPast(entry.date) && Api.signupConfigured()
-        ? `<a class="td-open-signup" href="${Render.escapeHtml(CONFIG.SIGNUP_FORM_URL)}" target="_blank" rel="noopener noreferrer">Sign up →</a>`
+      const signupLink = !Schedule.isPast(entry.date)
+        ? `<button type="button" class="td-open-signup" data-date="${Render.isoDate(entry.date)}" aria-label="Sign up as companion for ${Render.escapeHtml(Render.formatDate(entry.date))}">Sign up</button>`
         : '';
       return `<span class="td-badge td-badge--open">OPEN</span>${signupLink}`;
     }
@@ -229,6 +253,188 @@ const Render = {
     dom.scheduleSection.hidden = true;
   }
 };
+
+// ============================================================================
+// SIGN-UP DIALOG
+// ============================================================================
+const Signup = {
+  el: null,
+  date: null,
+  opener: null,
+  busy: false,
+
+  MOBILE_RE: /^(?:09\d{9}|\+639\d{9})$/,
+
+  build() {
+    const d = document.createElement('dialog');
+    d.className = 'signup-dialog';
+    d.setAttribute('aria-labelledby', 'signup-title');
+    d.innerHTML = `
+      <form class="signup-form" novalidate>
+        <div class="signup-head">
+          <p class="eyebrow">Volunteer as companion</p>
+          <h2 id="signup-title" class="signup-title">Sign up</h2>
+          <p class="signup-when" id="signup-when"></p>
+          <button type="button" class="signup-close" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+        <div class="signup-fields">
+          <div class="signup-field">
+            <label for="signup-name">Parent name <span class="req" aria-hidden="true">*</span></label>
+            <input id="signup-name" name="name" type="text" autocomplete="name" maxlength="60" required aria-describedby="signup-name-err" />
+            <p class="signup-err" id="signup-name-err" aria-live="polite"></p>
+          </div>
+          <div class="signup-field">
+            <label for="signup-mobile">Mobile number <span class="req" aria-hidden="true">*</span></label>
+            <input id="signup-mobile" name="mobile" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="09XXXXXXXXX" required aria-describedby="signup-mobile-hint signup-mobile-err" />
+            <p class="signup-hint" id="signup-mobile-hint">Format 09XXXXXXXXX or +639XXXXXXXXX.</p>
+            <p class="signup-err" id="signup-mobile-err" aria-live="polite"></p>
+          </div>
+          <p class="signup-consent">Your number is only visible to the Class Parent Reps.</p>
+          <p class="signup-status" role="alert"></p>
+        </div>
+        <div class="signup-actions">
+          <button type="button" class="signup-cancel">Cancel</button>
+          <button type="submit" class="signup-submit">Sign up</button>
+        </div>
+      </form>
+      <div class="signup-done" hidden>
+        <h2 class="signup-title" tabindex="-1">Thank you!</h2>
+        <p class="signup-done-text"></p>
+        <div class="signup-actions"><button type="button" class="signup-submit signup-done-close">Done</button></div>
+      </div>`;
+    document.body.appendChild(d);
+    this.el = d;
+    this.form = d.querySelector('form');
+    this.name = d.querySelector('#signup-name');
+    this.mobile = d.querySelector('#signup-mobile');
+    this.status = d.querySelector('.signup-status');
+    this.submitBtn = d.querySelector('.signup-submit');
+    this.done = d.querySelector('.signup-done');
+    this.form.addEventListener('submit', (ev) => { ev.preventDefault(); this.submit(); });
+    d.querySelector('.signup-close').addEventListener('click', () => this.close());
+    d.querySelector('.signup-cancel').addEventListener('click', () => this.close());
+    d.querySelector('.signup-done-close').addEventListener('click', () => this.close());
+    d.addEventListener('click', (ev) => { if (ev.target === d) this.close(); }); // backdrop
+    d.addEventListener('cancel', (ev) => { if (this.busy) ev.preventDefault(); });
+    d.addEventListener('close', () => {
+      // Return focus to the opener; if the row was re-rendered, to the list heading.
+      if (this.opener && document.contains(this.opener)) { this.opener.focus(); return; }
+      const h = document.querySelector('.td-section-title');
+      if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
+    });
+  },
+
+  open(date, opener) {
+    if (!this.el) this.build();
+    this.date = date;
+    this.opener = opener;
+    this.form.hidden = false;
+    this.done.hidden = true;
+    this.form.reset();
+    this.setError('name', '');
+    this.setError('mobile', '');
+    this.status.textContent = '';
+    this.setBusy(false);
+    const dt = new Date(date + 'T00:00:00');
+    this.el.querySelector('#signup-when').textContent = Render.formatDate(dt);
+    this.el.showModal();
+    this.name.focus();
+  },
+
+  close() {
+    if (this.busy) return;
+    if (this.el && this.el.open) this.el.close();
+  },
+
+  setError(field, msg) {
+    const input = field === 'name' ? this.name : this.mobile;
+    this.el.querySelector('#signup-' + field + '-err').textContent = msg;
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  },
+
+  setBusy(b) {
+    this.busy = b;
+    this.submitBtn.disabled = b;
+    this.submitBtn.textContent = b ? 'Signing up…' : 'Sign up';
+  },
+
+  validate() {
+    const name = this.name.value.replace(/\s+/g, ' ').trim();
+    const mobile = this.mobile.value.replace(/[\s().-]/g, '');
+    let ok = true;
+    if (name.length < 2) { this.setError('name', 'Please enter your name.'); ok = false; }
+    else if (/^[=+\-@]/.test(name)) { this.setError('name', 'Name can’t start with = + - or @.'); ok = false; }
+    else this.setError('name', '');
+    if (!mobile) { this.setError('mobile', 'Please enter your mobile number.'); ok = false; }
+    else if (!this.MOBILE_RE.test(mobile)) { this.setError('mobile', 'Use 09XXXXXXXXX or +639XXXXXXXXX.'); ok = false; }
+    else this.setError('mobile', '');
+    if (!ok) (this.name.getAttribute('aria-invalid') === 'true' ? this.name : this.mobile).focus();
+    return ok ? { name, mobile } : null;
+  },
+
+  async submit() {
+    if (this.busy) return;
+    this.status.textContent = '';
+    const v = this.validate();
+    if (!v) return;
+    this.setBusy(true);
+    let res;
+    try {
+      res = await Api.signup(this.date, v.name, v.mobile);
+    } catch (err) {
+      console.warn('Sign-up failed:', err.message);
+      res = { ok: false, error: 'network' };
+    }
+    this.setBusy(false);
+    if (res && res.ok) {
+      Signup.markFilled(this.date, res.name || v.name);
+      this.form.hidden = true;
+      this.done.hidden = false;
+      this.done.querySelector('.signup-done-text').textContent =
+        `You’re signed up as companion for ${Render.formatDate(new Date(this.date + 'T00:00:00'))}. The Class Parent Reps will reach out if needed.`;
+      this.done.querySelector('.signup-title').focus();
+      return;
+    }
+    const err = res && res.error;
+    if (err === 'taken') {
+      this.status.textContent = 'Sorry, someone just signed up for this date. The list has been refreshed; please pick another OPEN date.';
+      refreshSchedule();
+    } else if (err === 'invalid_mobile') {
+      this.setError('mobile', 'Use 09XXXXXXXXX or +639XXXXXXXXX.');
+    } else if (err === 'invalid_name') {
+      this.setError('name', 'Please enter your name.');
+    } else if (err === 'busy') {
+      this.status.textContent = 'The sheet is busy right now. Please try again in a few seconds.';
+    } else {
+      this.status.textContent = 'Couldn’t send your sign-up. Check your connection and try again, or message the class Viber group.';
+    }
+  },
+
+  /** Updates the row in place: navy check badge with the name, no button. */
+  markFilled(date, name) {
+    const btn = dom.scheduleList.querySelector(`.td-open-signup[data-date="${date}"]`);
+    if (!btn) return;
+    const li = btn.closest('.td-schedule-item');
+    li.classList.remove('is-open');
+    li.querySelector('.td-schedule-status').innerHTML =
+      `<span class="td-badge td-badge--filled">${Render.escapeHtml(name)}</span>`;
+  }
+};
+
+dom.scheduleList.addEventListener('click', (ev) => {
+  const btn = ev.target.closest('.td-open-signup');
+  if (btn) Signup.open(btn.dataset.date, btn);
+});
+
+async function refreshSchedule() {
+  try {
+    Render.fullSchedule(Schedule.normalize(await Api.fetchSchedule()));
+  } catch (error) {
+    console.warn('TD schedule refresh failed:', error.message);
+  }
+}
 
 // ============================================================================
 // INIT

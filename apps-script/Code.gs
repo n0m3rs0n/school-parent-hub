@@ -609,6 +609,124 @@ function doGet(e) {
   return jsonOutput_(getAnnouncements_());
 }
 
+// ============================================================================
+// TD COMPANION SIGN-UP (doPost)
+// ============================================================================
+// The browser POSTs a JSON string with Content-Type text/plain (a "simple"
+// request, so no CORS preflight, which Apps Script cannot answer):
+//   { action: 'td_signup', k: HUB_KEY, date: 'yyyy-mm-dd', name, mobile }
+// Responses: { ok: true, date, name } or { ok: false, error: '...' }.
+// The mobile number is NEVER returned and never appears in doGet output
+// (readTdSchedule_ only reads Date/Activity/Companion/Remarks columns).
+
+const TD_CACHE_KEY = 'td-schedule-v1';
+const TD_SIGNUPS_TAB = 'TD Signups';
+
+function doPost(e) {
+  let body;
+  try {
+    body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+  } catch (err) {
+    return jsonOutput_({ ok: false, error: 'bad_request' });
+  }
+  if (!body || typeof body !== 'object') return jsonOutput_({ ok: false, error: 'bad_request' });
+  if (!isAuthorized_(body.k)) return jsonOutput_({ ok: false, error: 'unauthorized' });
+  if (body.action === 'td_signup') return jsonOutput_(handleTdSignup_(body));
+  return jsonOutput_({ ok: false, error: 'unknown_action' });
+}
+
+function handleTdSignup_(body) {
+  const date = String(body.date || '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, error: 'invalid_date' };
+  const name = sanitizeName_(body.name);
+  if (name.length < 2) return { ok: false, error: 'invalid_name' };
+  const mobile = normalizePhMobile_(body.mobile);
+  if (!mobile) return { ok: false, error: 'invalid_mobile' };
+
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) return { ok: false, error: 'busy' };
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.TD_SHEET_ID);
+    const sheet = CONFIG.TD_SHEET_TAB ? ss.getSheetByName(CONFIG.TD_SHEET_TAB) : ss.getSheets()[0];
+    if (!sheet) return { ok: false, error: 'td_unavailable' };
+
+    const range = sheet.getDataRange();
+    const values = range.getValues();
+    const display = range.getDisplayValues();
+    // Same layout detection as readTdSchedule_.
+    const headerIndex = display.findIndex(function (row) {
+      return String(row[0]).trim().toLowerCase() === 'date';
+    });
+    if (headerIndex === -1) return { ok: false, error: 'td_unavailable' };
+    const header = display[headerIndex].map(function (h) { return String(h).trim().toLowerCase(); });
+    const ci = header.findIndex(function (h) { return /companion/.test(h); });
+    const companionCol = ci !== -1 ? ci : 2;
+    // Existing contact column, if the sheet has one (header like
+    // "Contact #", "Contact No.", "Phone", "Mobile", "Cellphone").
+    const contactCol = header.findIndex(function (h) { return /contact|phone|mobile|cell|number|no\./.test(h); });
+
+    const tz = Session.getScriptTimeZone();
+    let rowIndex = -1;
+    for (let r = headerIndex + 1; r < values.length; r++) {
+      const d = toDate_(values[r][0], display[r][0]);
+      if (!d) break;
+      if (Utilities.formatDate(d, tz, 'yyyy-MM-dd') === date) { rowIndex = r; break; }
+    }
+    if (rowIndex === -1) return { ok: false, error: 'not_found' };
+
+    // Re-read the live cell (not the cache) so two parents can't both win.
+    if (String(display[rowIndex][companionCol]).trim().toUpperCase() !== 'OPEN') {
+      return { ok: false, error: 'taken' };
+    }
+
+    sheet.getRange(rowIndex + 1, companionCol + 1).setValue(name);
+    let wroteContact = false;
+    if (contactCol !== -1 && contactCol !== companionCol && contactCol !== 0) {
+      sheet.getRange(rowIndex + 1, contactCol + 1).setValue("'" + mobile);
+      wroteContact = true;
+    }
+    // Private log, always (also the only copy of the number when the sheet
+    // has no contact column). Keep this tab unshared / owner-only.
+    appendTdSignupLog_(ss, date, name, mobile, wroteContact);
+    SpreadsheetApp.flush();
+    CacheService.getScriptCache().remove(TD_CACHE_KEY);
+    return { ok: true, date: date, name: name };
+  } catch (err) {
+    Logger.log('TD signup failed: ' + err.message);
+    return { ok: false, error: 'server_error' };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function appendTdSignupLog_(ss, date, name, mobile, wroteContact) {
+  let log = ss.getSheetByName(TD_SIGNUPS_TAB);
+  if (!log) {
+    log = ss.insertSheet(TD_SIGNUPS_TAB);
+    log.appendRow(['Timestamp', 'Date', 'Name', 'Mobile', 'Mobile also in schedule row']);
+    log.setFrozenRows(1);
+  }
+  log.appendRow([new Date(), date, name, "'" + mobile, wroteContact ? 'yes' : 'no']);
+}
+
+/** Trim, collapse whitespace, cap length, block formula injection. */
+function sanitizeName_(value) {
+  let s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  s = s.replace(/^[=+\-@\s]+/, '');
+  s = redactPhoneNumbers_(s);
+  return s.slice(0, 60).trim();
+}
+
+/** Accepts 09XXXXXXXXX or +639XXXXXXXXX (spaces/dashes ok); returns canonical 09XXXXXXXXX or ''. */
+function normalizePhMobile_(value) {
+  const s = String(value == null ? '' : value).slice(0, 30).replace(/[\s().-]/g, '');
+  let m = s.match(/^\+639(\d{9})$/) || s.match(/^639(\d{9})$/) || s.match(/^09(\d{9})$/);
+  return m ? '09' + m[1] : '';
+}
+
 /** Wraps any value as a JSON ContentService response. */
 function jsonOutput_(value) {
   return ContentService
@@ -680,7 +798,7 @@ function isAllowedSender_(fromValue) {
  */
 function getTdSchedulePayload_() {
   const cache = CacheService.getScriptCache();
-  const cacheKey = 'td-schedule-v1';
+  const cacheKey = TD_CACHE_KEY;
   const cached = cache.get(cacheKey);
   if (cached) return JSON.parse(cached);
 
