@@ -1923,3 +1923,13 @@ button {
     border: 1px solid CanvasText;
   }
 }
+
+/* TD session details */
+.td-info{margin:24px 0;border-top:1px solid var(--rule-strong);padding-top:16px}
+.td-info-title{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;margin:0 0 8px;color:var(--accent-text);font-family:inherit}
+.td-info-list{margin:0;display:grid}
+.td-info-row{display:grid;grid-template-columns:28px 1fr;column-gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--rule)}
+.td-info-icon{grid-row:span 2;width:22px;height:22px;margin-top:2px;fill:none;stroke:var(--accent-text);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.td-info-row dt{font-size:.8rem;opacity:.7;margin:0}
+.td-info-row dd{margin:2px 0 0;font-size:1rem;font-weight:500;line-height:1.35}
+.td-info-row--key dd{font-family:"Newsreader",Georgia,serif;font-size:1.35rem;font-weight:600;color:var(--accent-text)}

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" />
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
   <!-- Applies the saved/system theme before first paint, avoiding a flash
        of the wrong theme. theme.js (loaded later) only handles the toggle. -->
   <script>
@@ -58,6 +58,17 @@
           Tuesday TD Tutoring at Hermogenes Bautista Elementary School.
           This list is pulled live from the sign-up sheet (names only, no contact details).
         </p>
+
+        <section class="td-info" aria-labelledby="td-info-title">
+          <h2 id="td-info-title" class="td-info-title">Session details</h2>
+          <dl class="td-info-list">
+            <div class="td-info-row"><svg class="td-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 10l9-6 9 6"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg><dt>School</dt><dd>Hermogenes Bautista Elementary School</dd></div>
+            <div class="td-info-row"><svg class="td-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.2c3 .2 5.5 2.6 5.5 5.8"/></svg><dt>Class</dt><dd>G11 Blessed Gregorio Escribano</dd></div>
+            <div class="td-info-row td-info-row--key"><svg class="td-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><dt>Assembly time</dt><dd>11:45 AM</dd></div>
+            <div class="td-info-row"><svg class="td-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><dt>Assembly place</dt><dd>Near FLC Building, ASHS</dd></div>
+            <div class="td-info-row td-info-row--key"><svg class="td-info-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="13" rx="2"/><path d="M4 11h16"/><circle cx="8" cy="19.5" r="1.5"/><circle cx="16" cy="19.5" r="1.5"/></svg><dt>Departure</dt><dd>12:00 NN</dd></div>
+          </dl>
+        </section>
 
         <!-- Sign-up goes through a Google Form (CONFIG.SIGNUP_FORM_URL in
              td-companion.js), never the sheet itself, which holds phone numbers. -->
