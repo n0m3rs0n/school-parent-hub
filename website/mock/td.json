@@ -1,0 +1,20 @@
+{
+  "_note": "FICTIONAL sample data for local layout preview only (?mock=1). Not the real schedule; names are placeholders.",
+  "updatedAt": "2026-10-12T02:00:00.000Z",
+  "entries": [
+    { "date": "2026-09-08", "dateLabel": "September 8, 2026", "activity": "TD Tutoring Session", "companion": "CANCELLED", "remarks": "Cancelled due to weather" },
+    { "date": "2026-09-22", "dateLabel": "September 22, 2026", "activity": "TD Tutoring Session", "companion": "RE-SCHEDULED", "remarks": "PEPTalk moved to October 6, 2026" },
+    { "date": "2026-10-06", "dateLabel": "October 6, 2026", "activity": "PEPTalk (New Schedule)", "companion": "Parent A", "remarks": "" },
+    { "date": "2026-10-13", "dateLabel": "October 13, 2026", "activity": "TD Tutoring Session", "companion": "Parent B", "remarks": "" },
+    { "date": "2026-10-20", "dateLabel": "October 20, 2026", "activity": "TD Tutoring Session", "companion": "Parent C", "remarks": "" },
+    { "date": "2026-11-10", "dateLabel": "November 10, 2026", "activity": "TD Tutoring Session", "companion": "Parent D", "remarks": "" },
+    { "date": "2026-11-14", "dateLabel": "November 14, 2026", "activity": "(Saturday) Home Visit", "companion": "RE-SCHEDULED", "remarks": "Nov. 14 Home Visit is moved to Dec. 5 (Sat.)" },
+    { "date": "2026-11-17", "dateLabel": "November 17, 2026", "activity": "TD Tutoring Session", "companion": "Parent E", "remarks": "" },
+    { "date": "2026-12-05", "dateLabel": "December 5, 2026", "activity": "(Saturday) Home Visit", "companion": "TBC", "remarks": "Rescheduled from Nov. 14" },
+    { "date": "2026-12-15", "dateLabel": "December 15, 2026", "activity": "TD Christmas Party (?)", "companion": "TBC", "remarks": "" },
+    { "date": "2027-01-05", "dateLabel": "January 5, 2027", "activity": "TD Tutoring Session", "companion": "OPEN", "remarks": "" },
+    { "date": "2027-01-12", "dateLabel": "January 12, 2027", "activity": "TD Tutoring Session", "companion": "OPEN", "remarks": "" },
+    { "date": "2027-01-19", "dateLabel": "January 19, 2027", "activity": "TD Tutoring Session", "companion": "OPEN", "remarks": "" },
+    { "date": "2027-03-09", "dateLabel": "March 9, 2027", "activity": "TD Culminating Activity (TD Graduation)", "companion": "TBC", "remarks": "" }
+  ]
+}

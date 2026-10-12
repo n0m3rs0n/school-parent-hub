@@ -240,6 +240,13 @@ School-Parent-Hub/
   page like `important-dates.html`, then add a matching nav link to
   *all* pages' `site-nav` (including the new one, marked `is-active`) so
   the tab bar stays consistent everywhere.
+> **Update (Oct 2026):** the TD page no longer reads the sheet from the
+> browser. Apps Script now serves `?view=td` with only date / activity /
+> companion / remarks (see `apps-script/Code.gs`, `CONFIG.TD_SHEET_ID`),
+> and the feed requires the `HUB_KEY` script property. The gviz/JSONP
+> notes below describe the OLD design and are kept for history. See
+> `CHANGES.md` and `SETUP-STEPS.md`.
+
 - **To update the TD Companion page** (`td-companion.html`, `td-companion.js`):
   unlike Resources/Important Dates, this one is NOT a static snapshot —
   it fetches the sign-up Google Sheet live on every page load, since a

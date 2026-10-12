@@ -16,7 +16,17 @@
 const CONFIG = {
   // Replace with your deployed Apps Script Web App URL, e.g.:
   // "https://script.google.com/macros/s/XXXXXXXXXXXX/exec"
-  API_URL: 'https://script.google.com/macros/s/AKfycbyYdXjGYBGFw1PrFbB3-84iFNaYM6rok0818TTyEPL60ObYHBH0z6YQx7vTAzNOgusK/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbzUgDesUEX7Ib1RHecz6kmwzpUgBt5aSxcj50su6c5K1tKph-1xfNzcYMw-5JANGom2/exec',
+
+  // Shared key sent as ?k=... — must match Script Property HUB_KEY in Apps
+  // Script (and HUB_KEY in td-companion.js). Anyone can read it in the
+  // page source, so it only keeps the raw feed from being casually
+  // scraped/indexed; it is not a password.
+  HUB_KEY: 'OF1tf7KPCaMWpBie2c9Ynf5j',
+
+  // Local preview only: with ?mock=1 in the page URL, sample data is
+  // loaded from this file instead of the live API.
+  MOCK_URL: 'mock/announcements.json',
 
   // Explicit color for known categories. To customize a category's color,
   // or add a brand-new category, just add/edit an entry here — nothing
@@ -45,6 +55,8 @@ const CONFIG = {
   // across the full fetched dataset — only rendering is paginated.
   PAGE_SIZE: 9
 };
+
+const USE_MOCK = new URLSearchParams(window.location.search).get('mock') === '1';
 
 // ============================================================================
 // STATE
@@ -99,11 +111,20 @@ const Api = {
    * { date, title, category, summary, body, attachments }
    */
   async fetchAnnouncements() {
-    const response = await fetch(CONFIG.API_URL);
+    const url = USE_MOCK
+      ? CONFIG.MOCK_URL
+      : CONFIG.API_URL + '?k=' + encodeURIComponent(CONFIG.HUB_KEY);
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Network response was not OK: ' + response.status);
     }
-    return response.json();
+    const data = await response.json();
+    // The API reports problems (e.g. wrong/missing key) as { error: ... }
+    // with HTTP 200, because Apps Script can't set status codes.
+    if (!Array.isArray(data)) {
+      throw new Error('Feed unavailable: ' + ((data && data.error) || 'unexpected response'));
+    }
+    return data;
   }
 };
 
@@ -193,7 +214,7 @@ const Render = {
         <h3 class="card-title">${Render.escapeHtml(item.title)}</h3>
         <p class="card-date">${Render.formatDate(item.date)}</p>
       </div>
-      <span class="badge" style="background-color: ${badgeColor}">${Render.escapeHtml(item.category)}</span>
+      <span class="badge" style="--cat-color: ${badgeColor}">${Render.escapeHtml(item.category)}</span>
       <p class="card-summary">${Render.escapeHtml(item.summary)}</p>
       <div class="card-footer">
         <button class="read-more-btn" data-index="${index}">Read More →</button>
@@ -546,7 +567,7 @@ const Modal = {
 
     dom.modalCategory.textContent = item.category;
     dom.modalCategory.className = 'badge';
-    dom.modalCategory.style.backgroundColor = Render.categoryColor(item.category);
+    dom.modalCategory.style.setProperty('--cat-color', Render.categoryColor(item.category));
 
     dom.modalBody.innerHTML = '';
     if (item.bodyHtml) {
@@ -668,6 +689,11 @@ async function init() {
   dom.paginationPrev.addEventListener('click', handlePaginationPrev);
   dom.paginationNext.addEventListener('click', handlePaginationNext);
 
+  if (USE_MOCK) {
+    const banner = document.getElementById('mock-banner');
+    if (banner) banner.hidden = false;
+  }
+
   Render.showLoading();
 
   try {
@@ -678,7 +704,8 @@ async function init() {
     Render.hideLoading();
     Render.announcements();
   } catch (error) {
-    console.error('Failed to load announcements:', error);
+    // warn (not error): an unavailable feed is an expected, handled state.
+    console.warn('Announcements unavailable:', error.message);
     Render.showError();
   }
 }

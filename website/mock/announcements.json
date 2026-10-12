@@ -1,0 +1,6 @@
+[
+  { "date": "2026-10-09T01:30:00.000Z", "title": "[SAMPLE] Retreat reminders for Oct 15-16", "category": "Events", "summary": "Sample announcement for local preview only. Please prepare the retreat waiver and packing list before Thursday.", "body": "Sample announcement for local preview only.", "bodyHtml": "", "attachments": [] },
+  { "date": "2026-10-05T03:00:00.000Z", "title": "[SAMPLE] Online PTC schedule", "category": "Academics", "summary": "Sample announcement. Parent-teacher conference slots are listed in the attached schedule.", "body": "Sample announcement.", "bodyHtml": "", "attachments": [{ "name": "ptc-schedule.pdf", "mimeType": "application/pdf", "previewUrl": null, "viewUrl": null }] },
+  { "date": "2026-09-28T02:00:00.000Z", "title": "[SAMPLE] Second-quarter fees", "category": "Finance", "summary": "Sample announcement. Payment details for the second quarter.", "body": "Sample announcement.", "bodyHtml": "", "attachments": [] },
+  { "date": "2026-09-20T05:00:00.000Z", "title": "[SAMPLE] PTA volunteers needed", "category": "PTA", "summary": "Sample announcement. Volunteers needed for the Christmas salu-salo committee.", "body": "Sample announcement.", "bodyHtml": "", "attachments": [] }
+]

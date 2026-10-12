@@ -2,150 +2,119 @@
  * ============================================================================
  * TD COMPANION SCHEDULE — Front-end logic
  * ============================================================================
- * Reads the TD Tutoring sign-up sheet LIVE (via Google's public gviz JSON
- * feed) and renders it as a single chronological schedule. OPEN rows get a
- * colored border and their own inline "Sign up" link instead of being
- * repeated in a separate callout — one list, not two showing the same
- * dates. Unlike resources.html/important-dates.html, this page is
- * intentionally NOT a static snapshot: it's a sign-up tracker, so showing
- * a stale "OPEN" slot after someone has already signed up would be
- * actively misleading. There's no backend involved — Google Sheets' own
- * gviz endpoint is fetched directly from the browser.
+ * Loads the TD Tutoring schedule from the hub's Apps Script endpoint
+ * (?view=td) and renders it as a single chronological list. OPEN rows get a
+ * colored border and their own inline "Sign up" link.
  *
- * WHY JSONP INSTEAD OF fetch(): the gviz endpoint doesn't send an
- * Access-Control-Allow-Origin header, so a same-origin-policy fetch() call
- * would be blocked by the browser. Loading it as a <script> tag sidesteps
- * that (script loads aren't subject to CORS), which is exactly why Google
- * formats the response as a JS function call rather than plain JSON —
- * it's designed to be used this way. Passing tqx=responseHandler:NAME
- * makes it call our own callback instead of the default one.
+ * PRIVACY: the browser no longer reads the Google Sheet directly. The old
+ * version fetched the whole public sheet (gviz feed), which also delivered
+ * the Contact # column to every visitor. Now Apps Script reads the sheet
+ * server-side and returns ONLY date, activity, companion name/status and
+ * remarks (with phone-like numbers redacted). The sheet ID lives only in
+ * apps-script/Code.gs (CONFIG.TD_SHEET_ID).
+ *
+ * LOCAL PREVIEW: add ?mock=1 to the URL to load mock/td.json instead of
+ * the live endpoint (fictional data, for layout checks only).
  * ============================================================================
  */
 
 const CONFIG = {
-  SHEET_ID: '1LTM3jBpo1aedZaiYHtKJmwjEY7KOimqVZ82frZRNTE4',
-  SIGNUP_URL: 'https://docs.google.com/spreadsheets/d/1LTM3jBpo1aedZaiYHtKJmwjEY7KOimqVZ82frZRNTE4/edit?usp=sharing',
-  // Generous on purpose: a phone on a weak mobile signal can take a while
-  // to complete this request, and there's no cost to waiting longer
-  // before giving up versus showing an error a slow connection would've
-  // recovered from a few seconds later.
-  JSONP_TIMEOUT_MS: 20000
+  // Same Apps Script Web App /exec URL as API_URL in app.js.
+  API_URL: 'https://script.google.com/macros/s/AKfycbzUgDesUEX7Ib1RHecz6kmwzpUgBt5aSxcj50su6c5K1tKph-1xfNzcYMw-5JANGom2/exec',
+
+  // Must match Script Property HUB_KEY in Apps Script (same value as in
+  // app.js). Visible to anyone who views source — it's a speed bump
+  // against casual scraping, not a password.
+  HUB_KEY: 'OF1tf7KPCaMWpBie2c9Ynf5j',
+
+  // TODO(Nomerson): create a Google Form for TD companion sign-ups and paste
+  // its share link here (Form > Send > link icon), e.g.
+  // 'https://forms.gle/XXXXXXXXXXXX'. While this is the placeholder, the
+  // sign-up buttons are hidden and a "coming soon" note is shown instead.
+  // Do NOT put the sheet's edit link back here — it exposes phone numbers.
+  SIGNUP_FORM_URL: 'REPLACE_WITH_GOOGLE_FORM_URL',
+
+  MOCK_URL: 'mock/td.json',
+
+  // Generous on purpose: a phone on a weak mobile signal can take a while.
+  FETCH_TIMEOUT_MS: 20000
 };
+
+const USE_MOCK = new URLSearchParams(window.location.search).get('mock') === '1';
 
 const dom = {
   loading: document.getElementById('td-loading'),
   error: document.getElementById('td-error'),
   retry: document.getElementById('td-retry'),
+  signupBtn: document.getElementById('td-signup-btn'),
+  signupPending: document.getElementById('td-signup-pending'),
+  mockBanner: document.getElementById('mock-banner'),
   scheduleSection: document.getElementById('td-schedule-section'),
   scheduleList: document.getElementById('td-schedule-list')
 };
 
 // ============================================================================
-// JSONP LOADER
+// API
 // ============================================================================
-const Jsonp = {
-  /** Loads a gviz URL via a <script> tag and resolves with the parsed payload. */
-  load(sheetId) {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'tdCompanionCallback_' + Date.now();
-      const script = document.createElement('script');
-      let settled = false;
+const Api = {
+  signupConfigured() {
+    return /^https:\/\//.test(CONFIG.SIGNUP_FORM_URL);
+  },
 
-      const cleanup = () => {
-        delete window[callbackName];
-        script.remove();
-        clearTimeout(timer);
-      };
+  async fetchSchedule() {
+    const url = USE_MOCK
+      ? CONFIG.MOCK_URL
+      : CONFIG.API_URL + '?view=td&k=' + encodeURIComponent(CONFIG.HUB_KEY);
 
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        reject(new Error('Timed out waiting for the sheet to load.'));
-      }, CONFIG.JSONP_TIMEOUT_MS);
-
-      window[callbackName] = (payload) => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(payload);
-      };
-
-      script.onerror = () => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        reject(new Error('Failed to load the sheet.'));
-      };
-
-      // headers=0 disables gviz's own automatic header-row guessing. That
-      // guess is based on data-type consistency down each column, and it
-      // silently SHIFTED after a real sign-up (a phone number landed in
-      // the Contact # column), which made gviz swallow every earlier row
-      // — the real header included — into decorative column labels
-      // instead of table.rows. Schedule.parse() already finds the real
-      // header row itself by content, so gviz's own guessing was never
-      // needed; forcing headers=0 makes every row land in table.rows
-      // every time, regardless of what the data looks like.
-      const url = 'https://docs.google.com/spreadsheets/d/' + sheetId +
-        '/gviz/tq?headers=0&tqx=responseHandler:' + callbackName;
-      script.src = url;
-      document.head.appendChild(script);
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const payload = await response.json();
+      if (!payload || payload.error || !Array.isArray(payload.entries)) {
+        throw new Error('Schedule unavailable: ' + ((payload && payload.error) || 'bad response'));
+      }
+      return payload.entries;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 };
 
 // ============================================================================
-// PARSING — turns the raw gviz table into a clean list of schedule entries
+// PARSING — normalizes API entries
 // ============================================================================
 const Schedule = {
-  DATE_PATTERN: /^[A-Za-z]+\s+\d{1,2},\s*\d{4}$/,
-
-  /**
-   * The sheet has decorative title rows before the real header and
-   * footer notes after the data — not a clean table. Rather than assume
-   * fixed row numbers (fragile if someone inserts a row), this finds the
-   * header row by content (first cell === "Date") and then reads data
-   * rows until a row's first cell stops looking like a date.
-   */
-  parse(gvizResponse) {
-    const rows = gvizResponse.table.rows;
-    const cellAt = (row, i) => (row.c[i] && row.c[i].v != null) ? String(row.c[i].v).trim() : '';
-
-    const headerIndex = rows.findIndex((row) => cellAt(row, 0) === 'Date');
-    if (headerIndex === -1) {
-      throw new Error('Could not find the header row in the sheet.');
-    }
-
-    const entries = [];
-    for (let i = headerIndex + 1; i < rows.length; i++) {
-      const dateLabel = cellAt(rows[i], 0);
-      if (!Schedule.DATE_PATTERN.test(dateLabel)) break; // reached the footer notes
-
-      const activity = cellAt(rows[i], 1);
-      const companion = cellAt(rows[i], 2);
-      const remarks = cellAt(rows[i], 5);
-
-      entries.push({
-        date: new Date(dateLabel),
-        dateLabel,
-        activity,
-        companion,
-        remarks,
-        status: Schedule.statusFor(companion)
-      });
-    }
-
-    return entries;
+  /** Entries arrive as { date: 'yyyy-mm-dd', dateLabel, activity, companion, remarks }. */
+  normalize(entries) {
+    return entries
+      .map((e) => {
+        const companion = String(e.companion || '').trim();
+        const date = new Date(String(e.date) + 'T00:00:00');
+        return {
+          date,
+          activity: String(e.activity || ''),
+          companion,
+          remarks: String(e.remarks || ''),
+          status: Schedule.statusFor(companion)
+        };
+      })
+      .filter((e) => !isNaN(e.date.getTime()));
   },
+
+  // Companion-cell values that describe the SESSION, not a person. These
+  // must never render as a green "companion" badge.
+  NOTE_PATTERN: /^(RE-?\s?SCHEDULED|CANCELL?ED|POSTPONED|MOVED|NO SESSION|NO CLASS|SUSPENDED|N\/?A)\b/i,
 
   /** Classifies a row by its companion cell. */
   statusFor(companion) {
-    const normalized = companion.toUpperCase();
+    const normalized = companion.trim().toUpperCase();
+    if (!normalized) return 'note'; // nothing listed — remarks explain it
     if (normalized === 'OPEN') return 'open';
-    if (normalized === 'TBC') return 'tbc';
-    if (companion) return 'filled';
-    return 'note'; // no companion listed — usually a rescheduled/cancelled row explained in remarks
+    if (normalized === 'TBC' || normalized === 'TO BE CONFIRMED') return 'tbc';
+    if (Schedule.NOTE_PATTERN.test(normalized)) return 'note';
+    return 'filled';
   },
 
   /** True if the given date is strictly before today (start of day). */
@@ -170,27 +139,58 @@ const Render = {
     return div.innerHTML;
   },
 
-  /**
-   * The full schedule, in sheet order, with a status badge per row.
-   * Upcoming OPEN rows get a colored left border (via is-open) and their
-   * own inline "Sign up" link — no separate callout repeating the same
-   * dates elsewhere on the page.
-   */
+  /** "RE-SCHEDULED" -> "Rescheduled", "CANCELLED" -> "Cancelled". */
+  noteLabel(companion) {
+    const t = companion.trim().toLowerCase().replace(/-/g, '');
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+  },
+
+  signupCta() {
+    if (Api.signupConfigured()) {
+      dom.signupBtn.href = CONFIG.SIGNUP_FORM_URL;
+      dom.signupBtn.hidden = false;
+      dom.signupPending.hidden = true;
+    } else {
+      dom.signupBtn.hidden = true;
+      dom.signupPending.hidden = false;
+    }
+  },
+
+  /** Short parts for the visual day/month block (the full date stays in
+      .td-schedule-date, visually hidden, for screen readers). */
+  dateParts(date) {
+    return {
+      month: date.toLocaleDateString(undefined, { month: 'short' }),
+      day: date.getDate(),
+      weekday: date.toLocaleDateString(undefined, { weekday: 'short' })
+    };
+  },
+
   fullSchedule(entries) {
     dom.scheduleSection.hidden = false;
-    dom.scheduleList.innerHTML = entries.map((e) => {
+    dom.scheduleList.innerHTML = entries.map((e, i) => {
       const passed = Schedule.isPast(e.date);
       const isOpenUpcoming = e.status === 'open' && !passed;
-      const itemClass = 'td-schedule-item' + (passed ? ' is-passed' : '') + (isOpenUpcoming ? ' is-open' : '');
+      // Presentation only: the first row of each calendar year carries a
+      // year label so a list spanning 2026 to 2027 stays unambiguous.
+      const year = e.date.getFullYear();
+      const startsYear = i === 0 || entries[i - 1].date.getFullYear() !== year;
+      const itemClass = 'td-schedule-item' +
+        (passed ? ' is-passed' : '') +
+        (isOpenUpcoming ? ' is-open' : '') +
+        (e.status === 'note' ? ' is-note' : '') +
+        (startsYear ? ' td-year-start' : '');
+      const parts = Render.dateParts(e.date);
 
       return `
-        <li class="${itemClass}">
+        <li class="${itemClass}"${startsYear ? ` data-year="${year}"` : ''}>
+          <span class="date-block" aria-hidden="true"><span class="date-block-month">${Render.escapeHtml(parts.month)}</span><span class="date-block-day">${parts.day}</span><span class="date-block-dow">${Render.escapeHtml(parts.weekday)}</span></span>
           <div class="td-schedule-main">
-            <span class="td-schedule-date">${Render.formatDate(e.date)}</span>
+            <span class="td-schedule-date visually-hidden">${Render.formatDate(e.date)}</span>
             <span class="td-schedule-activity">${Render.escapeHtml(e.activity)}</span>
-            ${Render.statusBadge(e)}
+            ${e.remarks ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
           </div>
-          ${e.remarks ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
+          <div class="td-schedule-status">${Render.statusBadge(e)}</div>
         </li>
       `;
     }).join('');
@@ -201,15 +201,17 @@ const Render = {
       return `<span class="td-badge td-badge--filled">${Render.escapeHtml(entry.companion)}</span>`;
     }
     if (entry.status === 'open') {
-      const signupLink = !Schedule.isPast(entry.date)
-        ? `<a class="td-open-signup" href="${CONFIG.SIGNUP_URL}" target="_blank" rel="noopener noreferrer">Sign up →</a>`
+      const signupLink = !Schedule.isPast(entry.date) && Api.signupConfigured()
+        ? `<a class="td-open-signup" href="${Render.escapeHtml(CONFIG.SIGNUP_FORM_URL)}" target="_blank" rel="noopener noreferrer">Sign up →</a>`
         : '';
       return `<span class="td-badge td-badge--open">OPEN</span>${signupLink}`;
     }
     if (entry.status === 'tbc') {
       return '<span class="td-badge td-badge--tbc">To be confirmed</span>';
     }
-    return ''; // 'note' rows explain themselves via remarks, no badge needed
+    // 'note': rescheduled / cancelled / blank — neutral, never a green badge.
+    const label = Render.noteLabel(entry.companion);
+    return label ? `<span class="td-badge td-badge--note">${Render.escapeHtml(label)}</span>` : '';
   },
 
   showLoading() {
@@ -224,6 +226,7 @@ const Render = {
   showError() {
     dom.error.hidden = false;
     dom.loading.hidden = true;
+    dom.scheduleSection.hidden = true;
   }
 };
 
@@ -231,19 +234,17 @@ const Render = {
 // INIT
 // ============================================================================
 async function init() {
+  Render.signupCta();
+  if (USE_MOCK && dom.mockBanner) dom.mockBanner.hidden = false;
   Render.showLoading();
 
   try {
-    const response = await Jsonp.load(CONFIG.SHEET_ID);
-    if (response.status !== 'ok') {
-      throw new Error('Sheet returned an error status.');
-    }
-
-    const entries = Schedule.parse(response);
+    const entries = Schedule.normalize(await Api.fetchSchedule());
     Render.hideLoading();
     Render.fullSchedule(entries);
   } catch (error) {
-    console.error('Failed to load TD schedule:', error);
+    // warn (not error): an unavailable feed is an expected, handled state.
+    console.warn('TD schedule unavailable:', error.message);
     Render.showError();
   }
 }

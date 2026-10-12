@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Neutral typographic mark (not a school seal or logo): ink tile with "11E". -->
+  <rect width="64" height="64" rx="10" fill="#1F3A5F"/>
+  <text x="32" y="42" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="600" fill="#F7F6F2">11E</text>
+</svg>

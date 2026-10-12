@@ -1,72 +1,98 @@
 /* ============================================================================
-   SCHOOL PARENT INFORMATION HUB — Stylesheet
-   Design language: Material-inspired cards, rounded corners, soft shadows,
-   accessible color contrast, mobile-first responsive layout.
+   11-ESCRIBANO PARENT HUB — Stylesheet
+   Calm editorial system: warm paper ground, one ink-navy accent, a single
+   warm accent reserved for OPEN TD slots, hairline rules instead of heavy
+   cards, and a serif/sans pairing (Newsreader + Public Sans).
+   Mobile-first; desktop (>= 1024px) switches to a two-column layout with a
+   sticky page-intro column on the left.
    ============================================================================ */
 
 /* ---------- Design tokens ---------- */
 :root {
-  --color-primary: #1a56db;
-  --color-primary-dark: #1e429f;
-  /* Deliberately independent of --color-primary: the header keeps this
-     exact blue in both themes (a fixed brand color), while --color-primary
-     itself gets brightened for dark mode so links/accents stay visible on
-     a dark page background. Sharing one variable between "header
-     background behind white text" and "accent color on a dark surface"
-     would force a value that can't satisfy both contrast requirements. */
-  --color-header-bg: #1a56db;
-  --color-accent: #0e9f6e;
-  --color-bg: #f4f6fb;
-  --color-surface: #ffffff;
-  --color-text: #1f2937;
-  --color-text-muted: #5b6472;
-  --color-border: #e3e7ef;
-  --color-danger: #b91c1c;
+  color-scheme: light;
 
-  /* Per-category colors live in app.js (CONFIG.CATEGORY_COLORS), not
-     here — badges and chips get their color via an inline style computed
-     by Render.categoryColor(), so a category works correctly (with an
-     automatic fallback color) even without a matching CSS rule. Keeping
-     colors in one JS config instead of splitting them across CSS and JS
-     is the whole point of that setup — see the README's "Better category
-     management" note. */
+  /* Surfaces & ink */
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #efede6;
+  --text: #19212d;
+  --text-muted: #555e6b;
+  --rule: #dfdbd1;
+  --rule-strong: #c4beb1;
 
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.08);
-  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.10);
-  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.18);
+  /* The one accent: ink navy */
+  --accent: #1f3a5f;
+  --accent-ink: #ffffff;          /* text on --accent */
+  --accent-tint: #e5ebf3;
+  --accent-text: #1f3a5f;         /* accent used as text on --bg */
 
-  --header-height: 96px;
+  /* Warm accent: OPEN volunteer slots only */
+  --warm: #a3441a;
+  --warm-ink: #ffffff;
+  --warm-tint: #f9ece4;
+  --warm-text: #93391a;
+
+  --danger: #a12622;
+  --focus: #1f3a5f;
+  --overlay: rgba(20, 24, 32, 0.5);
+
+  /* Type */
+  --font-display: 'Newsreader', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Spacing scale (4px base) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  --radius: 6px;
+  --radius-sm: 4px;
+  --gutter: 20px;
+  --brand-row: 56px;
+  --nav-row: 48px;
+  --max: 1200px;
 }
 
-/* Dark theme overrides, applied via a data-theme attribute on <html> that
-   theme.js sets before first paint (see the inline script in <head> of
-   each page) — this avoids a flash of the wrong theme on load. Category
-   badge colors are left unchanged: they're solid, saturated backgrounds
-   with white text, so their contrast doesn't depend on the page theme. */
 :root[data-theme="dark"] {
-  --color-primary: #5b8def;
-  --color-primary-dark: #3b6fd6;
-  --color-accent: #22c58b;
-  --color-bg: #10141c;
-  --color-surface: #1a2130;
-  --color-text: #e6e9ef;
-  --color-text-muted: #9aa3b5;
-  --color-border: #2b3346;
-  --color-danger: #f87171;
+  color-scheme: dark;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --bg: #10151c;
+  --surface: #161d26;
+  --surface-2: #1d2631;
+  --text: #ebe8e1;
+  --text-muted: #a2abb7;
+  --rule: #29323e;
+  --rule-strong: #3b4655;
+
+  --accent: #a9c2e4;
+  --accent-ink: #0f1722;
+  --accent-tint: #1c2a3c;
+  --accent-text: #b4cbea;
+
+  --warm: #eea374;
+  --warm-ink: #22130a;
+  --warm-tint: #2c1f17;
+  --warm-text: #f2b089;
+
+  --danger: #f08a80;
+  --focus: #b4cbea;
+  --overlay: rgba(0, 0, 0, 0.65);
 }
 
-/* ---------- Reset ---------- */
-* {
+/* ---------- Reset & base ---------- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   /* Safety net: content (e.g. a long URL from an email body) that slips
@@ -75,548 +101,835 @@ html, body {
   overflow-x: hidden;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
-  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  background-color: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1;
 }
 
 img {
   max-width: 100%;
 }
 
+a {
+  color: var(--accent-text);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--accent-tint);
+  color: var(--text);
+}
+
 .visually-hidden {
-  position: absolute;
+  position: absolute !important;
   width: 1px;
   height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+  border: 0;
+}
+
+/* Author display rules (e.g. .signup-link-btn's inline-flex) would
+   otherwise override the HTML hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--s-3);
+  top: -100px;
+  z-index: 300;
+  padding: var(--s-3) var(--s-4);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: var(--s-3);
 }
 
 /* ---------- Header ---------- */
+/* On phones the wordmark row scrolls away and only the tab row stays
+   pinned (negative sticky offset = height of the wordmark row). */
 .site-header {
   position: sticky;
-  top: 0;
+  top: calc(-1 * var(--brand-row));
   z-index: 100;
-  background-color: var(--color-header-bg);
-  color: #fff;
-  box-shadow: var(--shadow-md);
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--rule);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .site-header {
+    background-color: color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    backdrop-filter: saturate(1.4) blur(10px);
+  }
 }
 
 .header-inner {
-  max-width: 1100px;
+  max-width: var(--max);
   margin: 0 auto;
-  padding: 16px 20px;
-  position: relative;
-}
-
-.theme-toggle {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: var(--brand-row) var(--nav-row);
   align-items: center;
-  justify-content: center;
-}
-
-.theme-toggle:hover,
-.theme-toggle:focus {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .brand {
-  display: flex;
-  align-items: center;
+  display: inline-flex;
+  align-items: baseline;
   gap: 10px;
-  font-size: 1.4rem;
-  font-weight: 700;
+  min-height: 44px;
+  align-self: center;
+  align-items: center;
+  color: var(--text);
+  text-decoration: none;
+  justify-self: start;
 }
 
-.brand-icon {
-  font-size: 1.6rem;
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1;
 }
 
-.brand-tagline {
-  margin: 4px 0 0;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
+.brand-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-left: 10px;
+  border-left: 1px solid var(--rule-strong);
+  line-height: 1.2;
+}
+
+.theme-toggle {
+  grid-column: 2;
+  grid-row: 1;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background-color: var(--surface-2);
+}
+
+.theme-toggle .icon-sun,
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+  display: block;
 }
 
 .site-nav {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: stretch;
   display: flex;
-  gap: 16px;
-  margin-top: 12px;
-  /* Scrolls horizontally instead of wrapping to a second line once there
-     are too many tabs to fit — keeps the header a fixed height on
-     mobile regardless of how many nav links exist. */
+  gap: var(--s-5);
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter);
+  /* Scrolls horizontally instead of wrapping once tabs don't fit. */
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .site-nav::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
+}
+
+/* theme.js adds .is-scrollable only if the tabs don't fit; the right-edge
+   fade hints that there's more to swipe to. */
+.site-nav.is-scrollable {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  padding-right: 40px;
 }
 
 .site-nav-link {
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding-bottom: 4px;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
 }
 
-.site-nav-link:hover,
-.site-nav-link:focus {
-  color: #fff;
+.site-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: transparent;
+}
+
+.site-nav-link:hover {
+  color: var(--text);
 }
 
 .site-nav-link.is-active {
-  color: #fff;
-  border-bottom-color: #fff;
+  color: var(--text);
+  font-weight: 600;
 }
 
-/* ---------- Layout ---------- */
+.site-nav-link.is-active::after {
+  background: var(--accent);
+}
+
+.site-nav-link:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ---------- Page layout ---------- */
 .container {
-  max-width: 1100px;
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: var(--max);
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: var(--s-6) var(--gutter) var(--s-8);
 }
 
-/* ---------- Controls ---------- */
+.page-head {
+  margin-bottom: var(--s-6);
+}
+
+.eyebrow {
+  margin: 0 0 var(--s-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.page-title {
+  font-size: 2.125rem;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.page-subtitle {
+  margin: var(--s-3) 0 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 38em;
+  text-wrap: pretty;
+}
+
+.page-subtitle strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Section label used above lists (TD schedule, month groups). */
+.td-section-title,
+.dates-month {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-2);
+  padding-bottom: var(--s-2);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.mock-banner {
+  margin: 0 0 var(--s-5);
+  padding: var(--s-3) var(--s-4);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.mock-banner::before {
+  content: 'Preview';
+  margin-right: var(--s-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Controls (Announcements) ---------- */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: var(--s-4);
+  margin-top: var(--s-5);
 }
 
 .search-wrap {
+  position: relative;
   width: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 16px;
+  min-height: 48px;
+  padding: 12px 14px 12px 44px;
   font-size: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  color: var(--color-text);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  color: var(--text);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.search-input:hover {
+  border-color: var(--text-muted);
 }
 
 .search-input:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
-/* ---------- Category filter chips (multi-select) ---------- */
+/* Category chips: square-cornered tags with a colour dot; the selected
+   chip is filled with ink, so state doesn't rely on the dot colour. */
 .category-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-2);
 }
 
 .category-chip {
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  border: 1px solid var(--rule-strong);
+  background-color: transparent;
+  color: var(--text);
   cursor: pointer;
 }
 
-.category-chip:hover,
-.category-chip:focus {
-  border-color: var(--color-primary);
+.category-chip::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chip-color, transparent);
+}
+
+.category-chip[data-category="all"]::before {
+  display: none;
+}
+
+.category-chip:hover {
+  border-color: var(--text-muted);
 }
 
 .category-chip.is-active {
-  color: #fff;
-  border-color: transparent;
-  /* --chip-color is set inline by Render.buildCategoryChips() per category
-     (see app.js); the static "All" chip has no --chip-color, so it falls
-     back to the neutral muted color below. */
-  background-color: var(--chip-color, var(--color-text-muted));
+  background-color: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
 }
 
-/* ---------- Advanced search (date range) ---------- */
+.category-chip.is-active::before {
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+
 .advanced-search-toggle {
   align-self: flex-start;
+  min-height: 44px;
+  margin: calc(-1 * var(--s-2)) 0;
+  padding: 0;
   background: none;
   border: none;
-  color: var(--color-primary);
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: var(--accent-text);
+  font-size: 0.9375rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: 4px 0;
+}
+
+.advanced-search-toggle:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
 .advanced-search-panel {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 16px;
-  padding: 16px;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.advanced-search-panel[hidden] {
-  display: none;
+  gap: var(--s-3) var(--s-4);
+  padding: var(--s-4);
+  background-color: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
 }
 
 .date-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+  gap: var(--s-1);
+  flex: 1 1 140px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .date-field input[type="date"] {
+  min-height: 44px;
   padding: 8px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-size: 0.9rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
 }
 
-.date-clear-btn {
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+.date-clear-btn,
+.pagination-btn,
+.td-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text);
+  background-color: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
 .date-clear-btn:hover,
-.date-clear-btn:focus {
-  color: var(--color-text);
+.pagination-btn:hover:not(:disabled),
+.td-retry-btn:hover {
+  background-color: var(--surface-2);
 }
 
-/* ---------- Result count ---------- */
+/* ---------- Result count / states ---------- */
 .result-count {
-  margin: 0 0 16px;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  margin: 0;
+  padding-bottom: var(--s-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--rule-strong);
 }
 
-/* ---------- Loading / empty / error states ---------- */
+.result-count:empty {
+  display: none;
+}
+
 .loading-indicator,
 .no-results,
 .error-message {
+  padding: var(--s-7) var(--s-4);
   text-align: center;
-  padding: 48px 16px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+}
+
+.error-message {
+  color: var(--danger);
+}
+
+.error-message p,
+.loading-indicator p,
+.no-results p {
+  margin: 0;
+}
+
+.td-retry-btn {
+  margin-top: var(--s-4);
+  color: var(--text);
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 12px;
-  border: 4px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  width: 28px;
+  height: 28px;
+  margin: 0 auto var(--s-3);
+  border: 2px solid var(--rule);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.error-message {
-  color: var(--color-danger);
+/* ---------- Announcement feed ---------- */
+/* Each announcement is a row separated by hairlines, not a floating card.
+   The title/date wrapper uses display: contents so date, title, excerpt,
+   category and "Read more" can be placed on one grid. */
+.announcements-grid {
+  display: flex;
+  flex-direction: column;
 }
 
-.td-retry-btn {
-  margin-top: 12px;
-  padding: 8px 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
-  background-color: var(--color-primary);
+.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "date date"
+    "title title"
+    "summary summary"
+    "badge footer";
+  column-gap: var(--s-4);
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--rule);
+  /* Grid items default to min-width: auto, so a long unbroken word or URL
+     would otherwise force the row wider than the viewport. */
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.card-header {
+  display: contents;
+}
+
+.card-date {
+  grid-area: date;
+  margin: 0 0 var(--s-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.card-title {
+  grid-area: title;
+  font-size: 1.375rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--text);
+  text-wrap: balance;
+  min-width: 0;
+}
+
+.card-summary {
+  grid-area: summary;
+  margin: var(--s-2) 0 var(--s-3);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  max-width: 40em;
+}
+
+.card > .badge {
+  grid-area: badge;
+  align-self: center;
+  justify-self: start;
+}
+
+.card-footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+}
+
+.read-more-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0 0 var(--s-2);
+  background: none;
   border: none;
-  border-radius: var(--radius-md);
+  color: var(--accent-text);
+  font-weight: 600;
+  font-size: 0.9375rem;
   cursor: pointer;
 }
 
-.td-retry-btn:hover,
-.td-retry-btn:focus {
-  background-color: var(--color-primary-dark);
+.read-more-btn:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
-/* ---------- Announcement grid & cards ---------- */
-.announcements-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+/* Category label: text + small colour dot (colour comes from app.js as
+   --cat-color). Quiet by design; the word carries the meaning. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
-@media (min-width: 640px) {
-  .announcements-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 960px) {
-  .announcements-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cat-color, var(--text-muted));
 }
 
 /* ---------- Pagination ---------- */
 .pagination {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 28px;
-}
-
-.pagination[hidden] {
-  display: none;
-}
-
-.pagination-btn {
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.pagination-btn:hover:not(:disabled),
-.pagination-btn:focus:not(:disabled) {
-  background-color: var(--color-bg);
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-top: var(--s-5);
 }
 
 .pagination-btn:disabled {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
+  border-color: var(--rule);
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .pagination-status {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  min-width: 100px;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
   text-align: center;
-}
-
-.card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  /* Grid items default to min-width: auto, so a long unbroken word or URL
-     in an email body would otherwise force the card (and the whole page)
-     wider than the viewport instead of wrapping. */
-  min-width: 0;
-  overflow-wrap: break-word;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--color-text);
-}
-
-.card-date {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
-.card-summary {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  flex-grow: 1;
-}
-
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.read-more-btn {
-  background: none;
-  border: none;
-  color: var(--color-primary);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 4px 0;
-}
-
-.read-more-btn:hover,
-.read-more-btn:focus {
-  text-decoration: underline;
-}
-
-/* ---------- Category badges ---------- */
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Modal ---------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(17, 24, 39, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
   z-index: 200;
-}
-
-.modal-overlay[hidden] {
-  display: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  background-color: var(--overlay);
 }
 
 .modal {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  max-width: 600px;
+  position: relative;
   width: 100%;
-  max-height: 85vh;
+  max-width: 680px;
+  max-height: 88vh;
   overflow-y: auto;
   overflow-wrap: break-word;
-  padding: 28px;
-  position: relative;
+  padding: var(--s-6) var(--gutter) var(--s-6);
+  background-color: var(--surface);
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--rule);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.18);
+}
+
+@media (min-width: 640px) {
+  .modal-overlay {
+    align-items: center;
+    padding: var(--s-5);
+  }
+
+  .modal {
+    padding: var(--s-7) var(--s-7) var(--s-6);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  }
 }
 
 .modal-close {
   position: absolute;
-  top: 12px;
-  right: 16px;
+  top: var(--s-3);
+  right: var(--s-3);
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
-  font-size: 1.6rem;
-  line-height: 1;
+  border-radius: var(--radius);
+  color: var(--text-muted);
   cursor: pointer;
-  color: var(--color-text-muted);
 }
 
-.modal-close:hover,
-.modal-close:focus {
-  color: var(--color-text);
+.modal-close:hover {
+  color: var(--text);
+  background: var(--surface-2);
 }
 
 .modal-title {
-  margin: 12px 0 4px;
-  font-size: 1.3rem;
+  margin: var(--s-3) 0 var(--s-1);
+  padding-right: var(--s-6);
+  font-size: 1.75rem;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .modal-date {
-  margin: 0 0 16px;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
+  margin: 0 0 var(--s-5);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rule);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
 }
 
 .modal-body {
   white-space: pre-wrap;
-  color: var(--color-text);
-  font-size: 1rem;
+  color: var(--text);
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
 /* Applied when rendering a sanitized HTML email body instead of plain
    text — real markup already provides its own line breaks/spacing. */
 .modal-body.is-rich {
   white-space: normal;
-  line-height: 1.6;
   overflow-wrap: break-word;
 }
 
 .modal-body.is-rich p {
-  margin: 0 0 12px;
+  margin: 0 0 var(--s-3);
 }
 
 .modal-body.is-rich a {
-  color: var(--color-primary);
+  color: var(--accent-text);
 }
 
 .modal-body.is-rich img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius-md);
-  margin: 8px 0;
+  border-radius: var(--radius);
+  margin: var(--s-2) 0;
 }
 
 .modal-body.is-rich ul,
 .modal-body.is-rich ol {
   padding-left: 22px;
-  margin: 0 0 12px;
+  margin: 0 0 var(--s-3);
 }
 
 .modal-body.is-rich blockquote {
-  margin: 0 0 12px;
-  padding-left: 12px;
-  border-left: 3px solid var(--color-border);
-  color: var(--color-text-muted);
+  margin: 0 0 var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 2px solid var(--rule-strong);
+  color: var(--text-muted);
 }
 
 .modal-body.is-rich table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 0 12px;
+  margin: 0 0 var(--s-3);
   /* Fixed layout makes columns share the table's own width instead of
-     expanding to fit their content — needed because some emails (e.g.
-     calendar invites) use deeply nested layout tables whose cells would
-     otherwise refuse to wrap and force the modal to overflow. */
+     expanding to fit their content (nested email layout tables). */
   table-layout: fixed;
 }
 
 .modal-body.is-rich th,
 .modal-body.is-rich td {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--rule);
   padding: 6px 10px;
   text-align: left;
   overflow-wrap: break-word;
@@ -624,14 +937,16 @@ img {
 
 .modal-body.is-rich hr {
   border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 16px 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-4) 0;
 }
 
 .modal-attachments {
-  margin-top: 16px;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-size: 0.9375rem;
+  color: var(--text-muted);
 }
 
 .modal-attachments:empty {
@@ -639,19 +954,22 @@ img {
 }
 
 .modal-attachments strong {
-  color: var(--color-text);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .attachment-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
 }
 
 .attachment-item {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
@@ -660,7 +978,7 @@ img {
   width: 100%;
   max-height: 320px;
   object-fit: contain;
-  background-color: var(--color-bg);
+  background-color: var(--surface-2);
 }
 
 .attachment-pdf-preview {
@@ -671,231 +989,749 @@ img {
 }
 
 .attachment-name-row {
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  background-color: var(--color-bg);
+  padding: var(--s-3) var(--s-3);
+  font-size: 0.9375rem;
+  color: var(--text);
+  background-color: var(--surface-2);
 }
 
 .attachment-name-row a {
-  color: var(--color-primary);
+  color: var(--accent-text);
 }
 
-/* ---------- Resources page ---------- */
-.page-title {
-  margin: 0 0 4px;
-  font-size: 1.5rem;
-  color: var(--color-text);
+/* ---------- Resources ---------- */
+.resource-note {
+  position: relative;
+  margin: var(--s-5) 0 0;
+  padding: var(--s-3) var(--s-4) var(--s-3) 44px;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius);
 }
 
-.page-subtitle {
-  margin: 0 0 24px;
-  color: var(--color-text-muted);
+.resource-note strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Lock glyph drawn in CSS (shared by the note and login badges). */
+.resource-note::before,
+.resource-login-badge::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.resource-note::before {
+  position: absolute;
+  left: var(--s-4);
+  top: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--text);
 }
 
 .resource-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 640px) {
-  .resource-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 960px) {
-  .resource-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  border-top: 1px solid var(--rule-strong);
 }
 
 .resource-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
   align-items: center;
-  gap: 12px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  padding: 18px 20px;
+  gap: var(--s-4);
+  min-height: 76px;
+  padding: var(--s-4) var(--s-1) var(--s-4) 0;
+  border-bottom: 1px solid var(--rule);
   text-decoration: none;
-  color: var(--color-text);
+  color: var(--text);
   min-width: 0;
   overflow-wrap: break-word;
 }
 
-.resource-card:hover,
-.resource-card:focus {
-  box-shadow: var(--shadow-md);
+.resource-card:focus-visible {
+  outline-offset: -2px;
 }
 
 .resource-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--accent-text);
 }
 
 .resource-name {
-  flex-grow: 1;
-  font-weight: 600;
-  font-size: 0.95rem;
+  min-width: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .resource-type {
-  flex-shrink: 0;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-/* ---------- Important Dates page ---------- */
+/* Arrow after the type label: "opens elsewhere". */
+.resource-type::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.resource-card:hover .resource-name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.resource-card:hover .resource-type {
+  color: var(--accent-text);
+}
+
+.resource-login-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: var(--s-1);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.resource-login-badge::before {
+  width: 13px;
+  height: 13px;
+}
+
+/* ---------- Date block (Important Dates + TD Companion) ---------- */
+.date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  min-height: 72px;
+  padding: var(--s-2) 0;
+  border-right: 1px solid var(--rule);
+  color: var(--text);
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.date-block-month {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.date-block-day {
+  margin: 5px 0 4px;
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.date-block.is-range .date-block-day {
+  font-size: 1.1875rem;
+  margin: 7px 0 6px;
+  letter-spacing: -0.03em;
+}
+
+.date-block-dow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ---------- Important Dates ---------- */
+.dates-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-5);
+  margin: var(--s-4) 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.legend-swatch.is-key {
+  background: var(--accent);
+}
+
+.legend-swatch.is-passed {
+  background: linear-gradient(to bottom, transparent 6px, var(--text-muted) 6px, var(--text-muted) 8px, transparent 8px);
+  border: 1px solid var(--rule-strong);
+}
+
+.dates-group + .dates-group {
+  margin-top: var(--s-6);
+}
+
+.dates-month-year {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
 .dates-list {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.date-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--s-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.date-row-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--s-3) 0;
+  min-width: 0;
 }
 
-.dates-list li {
-  padding: 14px 16px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
+.date-row-title {
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--text);
+  text-wrap: pretty;
 }
 
-.dates-list li.is-highlighted {
-  font-weight: 700;
-  color: var(--color-primary);
-  border-left: 4px solid var(--color-primary);
+.date-key {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.date-row.is-highlighted .date-row-title {
+  font-weight: 600;
+}
+
+.date-row.is-highlighted .date-block {
+  border-right: 2px solid var(--accent);
+}
+
+.date-row.is-highlighted .date-block-day {
+  color: var(--accent-text);
+  font-weight: 600;
 }
 
 /* Applied by the script at the bottom of important-dates.html once a
-   date (or, for a range, its last day) is in the past. Combines fine
-   with .is-highlighted — a highlighted date can also be a past one. */
-.dates-list li.is-passed {
+   date (or, for a range, its last day) is in the past. No opacity, so
+   the muted text still passes contrast; the strike-through carries it. */
+.date-row.is-passed .date-row-title {
+  color: var(--text-muted);
   text-decoration: line-through;
-  opacity: 0.55;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--text-muted);
+  font-weight: 400;
 }
 
-/* ---------- TD Companion page ---------- */
+.date-row.is-passed .date-block,
+.date-row.is-passed .date-block-day {
+  color: var(--text-muted);
+}
+
+.date-row.is-passed .date-block {
+  border-right: 1px solid var(--rule);
+}
+
+.date-row.is-passed .date-key {
+  background: transparent;
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
+}
+
+/* ---------- TD Companion ---------- */
 .signup-link-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 12px 20px;
-  background-color: var(--color-primary);
-  color: #fff;
+  gap: var(--s-2);
+  min-height: 48px;
+  margin-top: var(--s-5);
+  padding: 0 var(--s-5);
+  background-color: var(--accent);
+  color: var(--accent-ink);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
   text-decoration: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
 }
 
-.signup-link-btn:hover,
-.signup-link-btn:focus {
-  background-color: var(--color-primary-dark);
+.signup-link-btn:hover {
+  background-color: color-mix(in srgb, var(--accent) 88%, var(--text));
 }
 
-.td-section-title {
-  font-size: 1.1rem;
-  margin: 0 0 12px;
-  color: var(--color-text);
+.td-signup-pending {
+  margin: var(--s-5) 0 0;
+  padding: var(--s-3) var(--s-4);
+  border-left: 2px solid var(--accent);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text);
+  font-size: 0.9375rem;
+  line-height: 1.55;
 }
 
-.td-open-signup {
+.td-signup-pending strong {
+  display: block;
   font-weight: 600;
-  color: var(--color-accent);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.td-open-signup:hover,
-.td-open-signup:focus {
-  text-decoration: underline;
 }
 
 .td-schedule-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .td-schedule-item {
-  padding: 12px 16px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  grid-template-areas:
+    "date main"
+    "date status";
+  column-gap: var(--s-4);
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
 }
 
-.td-schedule-item.is-passed {
-  opacity: 0.55;
-}
-
-/* Flags an upcoming OPEN slot right in the schedule instead of also
-   repeating it in a separate callout section. */
-.td-schedule-item.is-open {
-  border-left: 4px solid var(--color-danger);
+.td-schedule-item > .date-block {
+  grid-area: date;
+  align-self: stretch;
 }
 
 .td-schedule-main {
+  grid-area: main;
+  align-self: end;
+  padding-top: var(--s-3);
+  min-width: 0;
+}
+
+.td-schedule-status {
+  grid-area: status;
+  align-self: start;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-3);
+  padding: var(--s-2) 0 var(--s-3);
 }
 
-.td-schedule-date {
-  font-weight: 600;
-  color: var(--color-text);
-  min-width: 150px;
+.td-schedule-status:empty {
+  display: none;
 }
 
 .td-schedule-activity {
-  color: var(--color-text-muted);
-  flex-grow: 1;
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
 }
 
 .td-schedule-remarks {
-  margin: 6px 0 0;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  font-style: italic;
+  margin: 2px 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-muted);
 }
 
+/* Year label on the first row of each calendar year. */
+.td-year-start::before {
+  content: attr(data-year);
+  grid-column: 1 / -1;
+  padding: var(--s-5) 0 var(--s-2);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text);
+  border-bottom: 1px solid var(--rule);
+}
+
+.td-schedule-item.td-year-start {
+  grid-template-areas:
+    "year year"
+    "date main"
+    "date status";
+}
+
+.td-schedule-item.td-year-start:first-child::before {
+  padding-top: var(--s-3);
+}
+
+/* Status badges: one shape for every state; the word is always shown. */
 .td-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
   font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
+/* Named volunteer */
 .td-badge--filled {
-  background-color: var(--color-accent);
-  color: #000;
+  background-color: var(--accent-tint);
+  color: var(--accent-text);
 }
 
+.td-badge--filled::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Needs a volunteer: the only warm, filled element on the site. */
 .td-badge--open {
-  background-color: var(--color-danger);
-  color: #fff;
+  background-color: var(--warm);
+  color: var(--warm-ink);
+  letter-spacing: 0.08em;
 }
 
+/* To be confirmed */
 .td-badge--tbc {
-  background-color: var(--color-border);
-  color: var(--color-text-muted);
+  background-color: transparent;
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
+}
+
+/* Cancelled / Rescheduled */
+.td-badge--note {
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.td-open-signup {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--warm-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.td-open-signup:hover {
+  text-decoration: underline;
+}
+
+/* Upcoming OPEN row: warm rule + tint behind the date block. */
+.td-schedule-item.is-open > .date-block {
+  background: var(--warm-tint);
+  border-right: 2px solid var(--warm);
+}
+
+.td-schedule-item.is-open .date-block-day {
+  color: var(--warm-text);
+}
+
+/* Past rows: muted, no opacity (keeps text above AA). */
+.td-schedule-item.is-passed .td-schedule-activity,
+.td-schedule-item.is-passed .date-block,
+.td-schedule-item.is-passed .date-block-day {
+  color: var(--text-muted);
+}
+
+.td-schedule-item.is-passed .td-schedule-activity {
+  font-weight: 400;
+}
+
+.td-schedule-item.is-passed .td-badge--filled {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.td-schedule-item.is-note:not(.is-passed) .td-schedule-activity {
+  color: var(--text-muted);
 }
 
 /* ---------- Footer ---------- */
 .site-footer {
-  text-align: center;
-  padding: 24px 16px;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--rule);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.footer-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: var(--s-6) var(--gutter) var(--s-7);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.footer-mark {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.footer-note {
+  margin-top: var(--s-1) !important;
+}
+
+.footer-legal {
+  margin-top: var(--s-4) !important;
+  font-size: 0.8125rem;
+}
+
+/* ---------- Tablet ---------- */
+@media (min-width: 640px) {
+  :root {
+    --gutter: 32px;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+
+  .td-schedule-item,
+  .td-schedule-item.td-year-start {
+    grid-template-columns: 72px 1fr auto;
+    grid-template-areas: "date main status";
+  }
+
+  .td-schedule-item.td-year-start {
+    grid-template-areas:
+      "year year year"
+      "date main status";
+  }
+
+  .td-schedule-main {
+    align-self: center;
+    padding: var(--s-4) 0;
+  }
+
+  .td-schedule-status {
+    align-self: center;
+    justify-content: flex-end;
+    padding: var(--s-4) 0;
+  }
+
+  .date-block,
+  .td-schedule-item > .date-block {
+    width: 72px;
+  }
+
+  .card {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+/* ---------- Desktop ---------- */
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 40px;
+  }
+
+  .site-header {
+    top: 0;
+  }
+
+  .header-inner {
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: 68px;
+    column-gap: var(--s-6);
+  }
+
+  .site-nav {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    gap: var(--s-6);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .site-nav.is-scrollable {
+    -webkit-mask-image: none;
+    mask-image: none;
+    padding-right: 0;
+  }
+
+  .site-nav-link {
+    min-height: 68px;
+  }
+
+  .theme-toggle {
+    grid-column: 3;
+    margin-right: -10px;
+  }
+
+  .container {
+    padding-top: var(--s-8);
+    padding-bottom: 96px;
+  }
+
+  .page-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 4fr) 8fr;
+    column-gap: 72px;
+    align-items: start;
+  }
+
+  .page-head {
+    position: sticky;
+    top: calc(68px + var(--s-6));
+    margin-bottom: 0;
+  }
+
+  .page-title {
+    font-size: 2.75rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.0625rem;
+  }
+
+  .page-body {
+    min-width: 0;
+  }
+
+  /* Announcements: date in its own left column, like a ledger. */
+  .card {
+    grid-template-columns: 128px 1fr auto;
+    grid-template-areas:
+      "date title title"
+      "date summary summary"
+      "date badge footer";
+    padding: var(--s-5) 0 var(--s-4);
+  }
+
+  .card-date {
+    margin: 7px 0 0;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .resource-card {
+    min-height: 84px;
+    padding-right: var(--s-2);
+  }
+
+  .resource-name {
+    font-size: 1.125rem;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: minmax(280px, 4fr) 8fr;
+    column-gap: 72px;
+    align-items: end;
+  }
+
+  .footer-legal {
+    margin-top: 0 !important;
+    text-align: right;
+  }
+
+  .footer-note {
+    grid-column: 1;
+  }
+
+  .footer-legal {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* ---------- Motion ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .site-nav-link::after,
+  .category-chip,
+  .resource-icon,
+  .theme-toggle,
+  .read-more-btn {
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .spinner {
+    animation: none;
+    border-top-color: var(--rule);
+  }
+}
+
+/* ---------- Windows high contrast ---------- */
+@media (forced-colors: active) {
+  .td-badge,
+  .date-key,
+  .category-chip {
+    border: 1px solid CanvasText;
+  }
 }

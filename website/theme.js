@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * DARK MODE TOGGLE — shared by index.html and resources.html
+ * DARK MODE TOGGLE — shared by every page
  * ============================================================================
  * The initial theme (light/dark) is already applied before this file loads
  * — see the small inline script in each page's <head>, which reads the
@@ -18,7 +18,7 @@
 
   function updateButton() {
     const isDark = currentTheme() === 'dark';
-    toggleButton.textContent = isDark ? '☀️' : '🌙';
+    // Icon (moon/sun SVG) is swapped by CSS from [data-theme]; only the label changes here.
     toggleButton.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
   }
 
@@ -30,4 +30,19 @@
   });
 
   updateButton();
+})();
+
+/* On narrow screens the nav scrolls horizontally; make sure the current
+   page's tab is visible instead of possibly clipped at the right edge. */
+(function () {
+  const nav = document.querySelector('.site-nav');
+  const active = nav && nav.querySelector('.site-nav-link.is-active');
+  if (!active || nav.scrollWidth <= nav.clientWidth) return;
+  nav.classList.add('is-scrollable');
+  // Only scroll as far as needed to show the whole active tab (plus room
+  // for the edge fade), so earlier tabs stay visible when possible.
+  const navBox = nav.getBoundingClientRect();
+  const tabBox = active.getBoundingClientRect();
+  const overflow = tabBox.right - navBox.right + 48;
+  if (overflow > 0) nav.scrollLeft = overflow;
 })();

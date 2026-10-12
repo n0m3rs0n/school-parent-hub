@@ -6,7 +6,11 @@
   <title>Important Dates — School Parent Information Hub</title>
   <meta name="description" content="Key dates for the school year for parents." />
   <meta name="robots" content="noindex, nofollow" />
-  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" />
+  <link rel="stylesheet" href="style.css?v=4" />
   <!-- Applies the saved/system theme before first paint, avoiding a flash
        of the wrong theme. theme.js (loaded later) only handles the toggle. -->
   <script>
@@ -18,37 +22,50 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ============================== HEADER ============================== -->
   <header class="site-header">
     <div class="header-inner">
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
-      <div class="brand">
-        <span class="brand-icon" aria-hidden="true">❤️</span>
-        <span class="brand-name">11-Escribano Parent Hub</span>
-      </div>
-      <p class="brand-tagline">Gmail memos, updates &amp; resources, all in one place</p>
+      <a class="brand" href="index.html">
+        <span class="brand-name">11-Escribano</span>
+        <span class="brand-sub">Parent Hub</span>
+      </a>
       <nav class="site-nav" aria-label="Site sections">
         <a href="index.html" class="site-nav-link">Announcements</a>
         <a href="resources.html" class="site-nav-link">Resources</a>
-        <a href="important-dates.html" class="site-nav-link is-active">Important Dates</a>
+        <a href="important-dates.html" class="site-nav-link is-active" aria-current="page">Important Dates</a>
         <a href="td-companion.html" class="site-nav-link">TD Companion</a>
       </nav>
+      <!-- Icons swap via CSS on [data-theme]; theme.js only updates the label. -->
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+      </button>
     </div>
   </header>
 
   <!-- ============================== MAIN ============================== -->
-  <main class="container">
+  <main class="container" id="main">
 
-    <h1 class="page-title">Important Dates to Remember</h1>
-    <p class="page-subtitle">Key dates for SY 2026-27. Bolded dates are especially important — check your email for details closer to each one.</p>
+    <div class="page-layout">
+      <div class="page-head">
+        <p class="eyebrow">School calendar · SY 2026–27</p>
+        <h1 class="page-title">Important Dates to Remember</h1>
+        <p class="page-subtitle">Key dates for SY 2026-27. Dates marked <strong>Key date</strong> are especially important — check your email for details closer to each one.</p>
+        <p class="dates-legend"><span class="legend-item"><span class="legend-swatch is-key" aria-hidden="true"></span>Key date</span><span class="legend-item"><span class="legend-swatch is-passed" aria-hidden="true"></span>Already passed (struck through)</span></p>
+      </div>
 
+      <div class="page-body">
     <!--
       Static, manually maintained list — no backend/API involved, and not
       tied to Gmail import. When the school calendar changes, edit this
-      list directly. Use class="is-highlighted" on an <li> for a date that
+      list directly. Use class="date-row is-highlighted" (plus a <span class="date-key">Key date</span>) on an <li> for a date that
       should stand out (matches the bolded/colored dates in the source
-      calendar slides), plain <li> otherwise.
+      calendar slides), class="date-row" otherwise. Each <li> sits in the
+      <ul class="dates-list"> of its month's .dates-group section; the
+      visible date is the .date-block, and the visually-hidden span reads
+      the full date to screen readers.
 
       data-date (single day) or data-end-date (multi-day entries — use the
       LAST day of the range) is a plain ISO yyyy-mm-dd used only to detect
@@ -56,35 +73,123 @@
       bottom of this file. It's never displayed; the visible text is
       whatever's inside the <li>, so keep both in sync when editing.
     -->
-    <ul class="dates-list">
-      <li class="is-highlighted" data-date="2026-07-30">July 30 (Thu) — Schoolwide Mass Feast of St. Ignatius and Emergency Drill</li>
-      <li data-date="2026-08-11">August 11 (Tue) — Misa para sa Banal na Espiritu</li>
-      <li class="is-highlighted" data-date="2026-08-18">August 18 (Tue) — Mass Sponsorship</li>
-      <li data-date="2026-09-26">September 26 (Sat) — PREP-PUSH G11 Parenting Seminar #1</li>
-      <li data-date="2026-09-30">September 30 (Wed) — Sem 1 Advisory Marks</li>
-      <li data-date="2026-10-01">October 1 (Thu) — Schoolwide Mass &amp; Delaney-Duffy Day (D3)</li>
-      <li data-date="2026-10-07">October 7 (Wed) — Online PTC</li>
-      <li class="is-highlighted" data-end-date="2026-10-16">October 15 (Thu) – 16 (Fri) — Retreat @ Sacred Heart*</li>
-      <li data-end-date="2026-10-30">October 26 (Mon) – 30 (Fri) — Wellness Break</li>
-      <li data-end-date="2026-11-12">November 10 (Tue) – 12 (Thu) — Grade 11 CarEx</li>
-      <li data-end-date="2026-11-15">November 14 (Sat) – 15 (Sun) — TD Home Visit</li>
-      <li data-end-date="2026-11-24">November 23 (Mon) – 24 (Tue) — Final Exams</li>
-      <li data-end-date="2026-11-26">November 25 (Wed) – 26 (Thu) — Cura Personalis Days</li>
-      <li data-date="2026-11-28">November 28 (Sat) — PREP-PUSH G11 Parenting Seminar #2</li>
-      <li class="is-highlighted" data-date="2026-12-01">December 1 (Tue) — Start of Sem 2 — Online Schola Brevis</li>
-      <li data-date="2026-12-12">December 12 (Sat) — Advent Recollection for Parents</li>
-      <li data-date="2026-12-15">December 15 (Tue) — Immaculate Conception Themed Mass Sponsor</li>
-      <li class="is-highlighted" data-date="2026-12-18">December 18 (Fri) — Community Year-end Thanksgiving Mass and Christmas Salu-salo*</li>
-    </ul>
+      <section class="dates-group" aria-labelledby="m-july">
+        <h2 class="dates-month" id="m-july">July <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row is-highlighted" data-date="2026-07-30">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Jul</span><span class="date-block-day">30</span><span class="date-block-dow">Thu</span></span>
+            <span class="date-row-body"><span class="visually-hidden">July 30 (Thu): </span><span class="date-row-title">Schoolwide Mass Feast of St. Ignatius and Emergency Drill</span><span class="date-key">Key date</span></span>
+          </li>
+        </ul>
+      </section>
+      <section class="dates-group" aria-labelledby="m-august">
+        <h2 class="dates-month" id="m-august">August <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row" data-date="2026-08-11">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Aug</span><span class="date-block-day">11</span><span class="date-block-dow">Tue</span></span>
+            <span class="date-row-body"><span class="visually-hidden">August 11 (Tue): </span><span class="date-row-title">Misa para sa Banal na Espiritu</span></span>
+          </li>
+          <li class="date-row is-highlighted" data-date="2026-08-18">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Aug</span><span class="date-block-day">18</span><span class="date-block-dow">Tue</span></span>
+            <span class="date-row-body"><span class="visually-hidden">August 18 (Tue): </span><span class="date-row-title">Mass Sponsorship</span><span class="date-key">Key date</span></span>
+          </li>
+        </ul>
+      </section>
+      <section class="dates-group" aria-labelledby="m-september">
+        <h2 class="dates-month" id="m-september">September <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row" data-date="2026-09-26">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Sep</span><span class="date-block-day">26</span><span class="date-block-dow">Sat</span></span>
+            <span class="date-row-body"><span class="visually-hidden">September 26 (Sat): </span><span class="date-row-title">PREP-PUSH G11 Parenting Seminar #1</span></span>
+          </li>
+          <li class="date-row" data-date="2026-09-30">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Sep</span><span class="date-block-day">30</span><span class="date-block-dow">Wed</span></span>
+            <span class="date-row-body"><span class="visually-hidden">September 30 (Wed): </span><span class="date-row-title">Sem 1 Advisory Marks</span></span>
+          </li>
+        </ul>
+      </section>
+      <section class="dates-group" aria-labelledby="m-october">
+        <h2 class="dates-month" id="m-october">October <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row" data-date="2026-10-01">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Oct</span><span class="date-block-day">1</span><span class="date-block-dow">Thu</span></span>
+            <span class="date-row-body"><span class="visually-hidden">October 1 (Thu): </span><span class="date-row-title">Schoolwide Mass &amp; Delaney-Duffy Day (D3)</span></span>
+          </li>
+          <li class="date-row" data-date="2026-10-07">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Oct</span><span class="date-block-day">7</span><span class="date-block-dow">Wed</span></span>
+            <span class="date-row-body"><span class="visually-hidden">October 7 (Wed): </span><span class="date-row-title">Online PTC</span></span>
+          </li>
+          <li class="date-row is-highlighted" data-end-date="2026-10-16">
+            <span class="date-block is-range" aria-hidden="true"><span class="date-block-month">Oct</span><span class="date-block-day">15–16</span><span class="date-block-dow">Thu–Fri</span></span>
+            <span class="date-row-body"><span class="visually-hidden">October 15 (Thu) – 16 (Fri): </span><span class="date-row-title">Retreat @ Sacred Heart*</span><span class="date-key">Key date</span></span>
+          </li>
+          <li class="date-row" data-end-date="2026-10-30">
+            <span class="date-block is-range" aria-hidden="true"><span class="date-block-month">Oct</span><span class="date-block-day">26–30</span><span class="date-block-dow">Mon–Fri</span></span>
+            <span class="date-row-body"><span class="visually-hidden">October 26 (Mon) – 30 (Fri): </span><span class="date-row-title">Wellness Break</span></span>
+          </li>
+        </ul>
+      </section>
+      <section class="dates-group" aria-labelledby="m-november">
+        <h2 class="dates-month" id="m-november">November <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row" data-end-date="2026-11-12">
+            <span class="date-block is-range" aria-hidden="true"><span class="date-block-month">Nov</span><span class="date-block-day">10–12</span><span class="date-block-dow">Tue–Thu</span></span>
+            <span class="date-row-body"><span class="visually-hidden">November 10 (Tue) – 12 (Thu): </span><span class="date-row-title">Grade 11 CarEx</span></span>
+          </li>
+          <li class="date-row" data-end-date="2026-11-24">
+            <span class="date-block is-range" aria-hidden="true"><span class="date-block-month">Nov</span><span class="date-block-day">23–24</span><span class="date-block-dow">Mon–Tue</span></span>
+            <span class="date-row-body"><span class="visually-hidden">November 23 (Mon) – 24 (Tue): </span><span class="date-row-title">Final Exams</span></span>
+          </li>
+          <li class="date-row" data-end-date="2026-11-26">
+            <span class="date-block is-range" aria-hidden="true"><span class="date-block-month">Nov</span><span class="date-block-day">25–26</span><span class="date-block-dow">Wed–Thu</span></span>
+            <span class="date-row-body"><span class="visually-hidden">November 25 (Wed) – 26 (Thu): </span><span class="date-row-title">Cura Personalis Days</span></span>
+          </li>
+          <li class="date-row" data-date="2026-11-28">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Nov</span><span class="date-block-day">28</span><span class="date-block-dow">Sat</span></span>
+            <span class="date-row-body"><span class="visually-hidden">November 28 (Sat): </span><span class="date-row-title">PREP-PUSH G11 Parenting Seminar #2</span></span>
+          </li>
+        </ul>
+      </section>
+      <section class="dates-group" aria-labelledby="m-december">
+        <h2 class="dates-month" id="m-december">December <span class="dates-month-year">2026</span></h2>
+        <ul class="dates-list">
+          <li class="date-row is-highlighted" data-date="2026-12-01">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Dec</span><span class="date-block-day">1</span><span class="date-block-dow">Tue</span></span>
+            <span class="date-row-body"><span class="visually-hidden">December 1 (Tue): </span><span class="date-row-title">Start of Sem 2 — Online Schola Brevis</span><span class="date-key">Key date</span></span>
+          </li>
+          <li class="date-row" data-date="2026-12-05">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Dec</span><span class="date-block-day">5</span><span class="date-block-dow">Sat</span></span>
+            <span class="date-row-body"><span class="visually-hidden">December 5 (Sat): </span><span class="date-row-title">TD Home Visit (rescheduled from Nov 14–15)</span></span>
+          </li>
+          <li class="date-row" data-date="2026-12-12">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Dec</span><span class="date-block-day">12</span><span class="date-block-dow">Sat</span></span>
+            <span class="date-row-body"><span class="visually-hidden">December 12 (Sat): </span><span class="date-row-title">Advent Recollection for Parents</span></span>
+          </li>
+          <li class="date-row" data-date="2026-12-15">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Dec</span><span class="date-block-day">15</span><span class="date-block-dow">Tue</span></span>
+            <span class="date-row-body"><span class="visually-hidden">December 15 (Tue): </span><span class="date-row-title">Immaculate Conception Themed Mass Sponsor</span></span>
+          </li>
+          <li class="date-row is-highlighted" data-date="2026-12-18">
+            <span class="date-block" aria-hidden="true"><span class="date-block-month">Dec</span><span class="date-block-day">18</span><span class="date-block-dow">Fri</span></span>
+            <span class="date-row-body"><span class="visually-hidden">December 18 (Fri): </span><span class="date-row-title">Community Year-end Thanksgiving Mass and Christmas Salu-salo*</span><span class="date-key">Key date</span></span>
+          </li>
+        </ul>
+      </section>
+      </div>
+    </div>
 
   </main>
 
   <!-- ============================== FOOTER ============================== -->
   <footer class="site-footer">
-    <p>&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+    <div class="footer-inner">
+      <p class="footer-mark">11-Escribano Parent Hub</p>
+      <p class="footer-note">Gmail memos, updates &amp; resources, all in one place.</p>
+      <p class="footer-legal">&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+    </div>
   </footer>
 
-  <script src="theme.js"></script>
+  <script src="theme.js?v=2"></script>
   <script>
     document.getElementById('footer-year').textContent = new Date().getFullYear();
 

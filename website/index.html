@@ -6,7 +6,11 @@
   <title>School Parent Information Hub</title>
   <meta name="description" content="Latest school announcements, events, and updates for parents." />
   <meta name="robots" content="noindex, nofollow" />
-  <link rel="stylesheet" href="style.css?v=1" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" />
+  <link rel="stylesheet" href="style.css?v=4" />
   <!-- Applies the saved/system theme before first paint, avoiding a flash
        of the wrong theme. theme.js (loaded later) only handles the toggle. -->
   <script>
@@ -18,109 +22,128 @@
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- ============================== HEADER ============================== -->
   <header class="site-header">
     <div class="header-inner">
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
-      <div class="brand">
-        <span class="brand-icon" aria-hidden="true">❤️</span>
-        <span class="brand-name">11-Escribano Parent Hub</span>
-      </div>
-      <p class="brand-tagline">Gmail memos, updates &amp; resources, all in one place</p>
+      <a class="brand" href="index.html">
+        <span class="brand-name">11-Escribano</span>
+        <span class="brand-sub">Parent Hub</span>
+      </a>
       <nav class="site-nav" aria-label="Site sections">
-        <a href="index.html" class="site-nav-link is-active">Announcements</a>
+        <a href="index.html" class="site-nav-link is-active" aria-current="page">Announcements</a>
         <a href="resources.html" class="site-nav-link">Resources</a>
         <a href="important-dates.html" class="site-nav-link">Important Dates</a>
         <a href="td-companion.html" class="site-nav-link">TD Companion</a>
       </nav>
+      <!-- Icons swap via CSS on [data-theme]; theme.js only updates the label. -->
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+      </button>
     </div>
   </header>
 
   <!-- ============================== MAIN ============================== -->
-  <main class="container">
+  <main class="container" id="main">
 
-    <!-- Controls: search + category filter -->
-    <section class="controls" aria-label="Search and filter announcements">
-      <div class="search-wrap">
-        <label for="search-input" class="visually-hidden">Search announcements</label>
-        <input
-          type="search"
-          id="search-input"
-          class="search-input"
-          placeholder="Search announcements..."
-          autocomplete="off"
-        />
+    <div id="mock-banner" class="mock-banner" hidden>Preview mode: showing sample data from mock/announcements.json (not real announcements).</div>
+
+    <div class="page-layout">
+      <div class="page-head">
+        <p class="eyebrow">From the school inbox</p>
+        <h1 class="page-title">Announcements</h1>
+        <p class="page-subtitle">School memos and class updates, newest first. Search or filter by category.</p>
+
+        <!-- Controls: search + category filter -->
+          <section class="controls" aria-label="Search and filter announcements">
+          <div class="search-wrap">
+          <svg class="icon search-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <label for="search-input" class="visually-hidden">Search announcements</label>
+            <input
+              type="search"
+              id="search-input"
+              class="search-input"
+              placeholder="Search announcements"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Multi-select category chips: click to toggle a category on/off.
+               No chips selected (besides "All") means no category restriction.
+               The "All" chip is the only one hardcoded — the rest are built by
+               Render.buildCategoryChips() from whatever categories actually
+               appear in the fetched data, so a brand-new category shows up
+               automatically with no HTML changes needed. -->
+          <div id="category-chips" class="category-chips" role="group" aria-label="Filter by category">
+            <button type="button" class="category-chip is-active" data-category="all">All</button>
+          </div>
+
+          <button
+            type="button"
+            id="advanced-search-toggle"
+            class="advanced-search-toggle"
+            aria-expanded="false"
+            aria-controls="advanced-search-panel"
+          >
+            ▸ Advanced search (date range)
+          </button>
+
+          <div id="advanced-search-panel" class="advanced-search-panel" hidden>
+            <div class="date-field">
+              <label for="date-from">From</label>
+              <input type="date" id="date-from" />
+            </div>
+            <div class="date-field">
+              <label for="date-to">To</label>
+              <input type="date" id="date-to" />
+            </div>
+            <button type="button" id="date-clear" class="date-clear-btn">Clear dates</button>
+          </div>
+        </section>
+
       </div>
 
-      <!-- Multi-select category chips: click to toggle a category on/off.
-           No chips selected (besides "All") means no category restriction.
-           The "All" chip is the only one hardcoded — the rest are built by
-           Render.buildCategoryChips() from whatever categories actually
-           appear in the fetched data, so a brand-new category shows up
-           automatically with no HTML changes needed. -->
-      <div id="category-chips" class="category-chips" role="group" aria-label="Filter by category">
-        <button type="button" class="category-chip is-active" data-category="all">All</button>
-      </div>
+      <div class="page-body">
+        <!-- Status row: result count -->
+        <p id="result-count" class="result-count" aria-live="polite"></p>
 
-      <button
-        type="button"
-        id="advanced-search-toggle"
-        class="advanced-search-toggle"
-        aria-expanded="false"
-        aria-controls="advanced-search-panel"
-      >
-        ▸ Advanced search (date range)
-      </button>
-
-      <div id="advanced-search-panel" class="advanced-search-panel" hidden>
-        <div class="date-field">
-          <label for="date-from">From</label>
-          <input type="date" id="date-from" />
+        <!-- Loading indicator -->
+        <div id="loading-indicator" class="loading-indicator" role="status">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Loading announcements...</p>
         </div>
-        <div class="date-field">
-          <label for="date-to">To</label>
-          <input type="date" id="date-to" />
+
+        <!-- No results message -->
+        <div id="no-results" class="no-results" hidden>
+          <p>No announcements found. Try a different search or category.</p>
         </div>
-        <button type="button" id="date-clear" class="date-clear-btn">Clear dates</button>
+
+        <!-- Error message -->
+        <div id="error-message" class="error-message" hidden>
+          <p>Announcements are temporarily unavailable; check the class Viber group.</p>
+        </div>
+
+        <!-- Announcement cards render here -->
+        <section id="announcements-grid" class="announcements-grid" aria-label="Announcements"></section>
+
+        <!-- Pagination controls -->
+        <nav id="pagination" class="pagination" aria-label="Announcements pages" hidden>
+          <button id="pagination-prev" class="pagination-btn" type="button">← Prev</button>
+          <span id="pagination-status" class="pagination-status" aria-live="polite"></span>
+          <button id="pagination-next" class="pagination-btn" type="button">Next →</button>
+        </nav>
+
       </div>
-    </section>
-
-    <!-- Status row: result count -->
-    <p id="result-count" class="result-count" aria-live="polite"></p>
-
-    <!-- Loading indicator -->
-    <div id="loading-indicator" class="loading-indicator" role="status">
-      <div class="spinner" aria-hidden="true"></div>
-      <p>Loading announcements...</p>
     </div>
-
-    <!-- No results message -->
-    <div id="no-results" class="no-results" hidden>
-      <p>No announcements found. Try a different search or category.</p>
-    </div>
-
-    <!-- Error message -->
-    <div id="error-message" class="error-message" hidden>
-      <p>Something went wrong while loading announcements. Please try again later.</p>
-    </div>
-
-    <!-- Announcement cards render here -->
-    <section id="announcements-grid" class="announcements-grid" aria-label="Announcements"></section>
-
-    <!-- Pagination controls -->
-    <nav id="pagination" class="pagination" aria-label="Announcements pages" hidden>
-      <button id="pagination-prev" class="pagination-btn" type="button">← Prev</button>
-      <span id="pagination-status" class="pagination-status" aria-live="polite"></span>
-      <button id="pagination-next" class="pagination-btn" type="button">Next →</button>
-    </nav>
 
   </main>
 
   <!-- ============================== READ MORE MODAL ============================== -->
   <div id="modal-overlay" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <button id="modal-close" class="modal-close" aria-label="Close">&times;</button>
+      <button id="modal-close" class="modal-close" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <span id="modal-category" class="badge"></span>
       <h2 id="modal-title" class="modal-title"></h2>
       <p id="modal-date" class="modal-date"></p>
@@ -129,12 +152,17 @@
     </div>
   </div>
 
+
   <!-- ============================== FOOTER ============================== -->
   <footer class="site-footer">
-    <p>&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+    <div class="footer-inner">
+      <p class="footer-mark">11-Escribano Parent Hub</p>
+      <p class="footer-note">Gmail memos, updates &amp; resources, all in one place.</p>
+      <p class="footer-legal">&copy; <span id="footer-year"></span> ASHS Parent Information Hub. Built for 11-ESC parent community SY 26-27.</p>
+    </div>
   </footer>
 
-  <script src="theme.js"></script>
-  <script src="app.js"></script>
+  <script src="theme.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
