@@ -20,7 +20,7 @@
 
 const CONFIG = {
   // Same Apps Script Web App /exec URL as API_URL in app.js.
-  API_URL: 'https://script.google.com/macros/s/AKfycbzUmvkn-zgl4W9gpiv522UHT5vRCblZGvBvSq_QKPYLHOdr5EdCrMk4Kqy6n9eqRzrD/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbyLZKbqBHHC_NCp8X68_oyUFb6gudXUk_uzRU5xoQH5ecq4A3lGiHaZHi2-HQS6-mtY/exec',
 
   // Must match Script Property HUB_KEY in Apps Script (same value as in
   // app.js). Visible to anyone who views source — it's a speed bump
@@ -141,6 +141,11 @@ const Schedule = {
     return 'filled';
   },
 
+  /** Home-visit rows (e.g. "(Saturday) Home Visit") get their own label. */
+  isHomeVisit(entry) {
+    return /home\s*visit/i.test(entry.activity);
+  },
+
   /** True if the given date is strictly before today (start of day). */
   isPast(date) {
     const today = new Date();
@@ -199,10 +204,16 @@ const Render = {
       // year label so a list spanning 2026 to 2027 stays unambiguous.
       const year = e.date.getFullYear();
       const startsYear = i === 0 || entries[i - 1].date.getFullYear() !== year;
+      // Home visits are not Tuesday school sessions: label them clearly and
+      // warn that the standard assembly time/place may not apply. Details
+      // (8:00 AM–12:00 NN, up to 5 parents) confirmed by Nomerson for Dec 5.
+      // No meeting place was given, so none is shown.
+      const homeVisit = Schedule.isHomeVisit(e);
       const itemClass = 'td-schedule-item' +
         (passed ? ' is-passed' : '') +
         (isOpenUpcoming ? ' is-open' : '') +
         (e.status === 'note' ? ' is-note' : '') +
+        (homeVisit ? ' is-home-visit' : '') +
         (startsYear ? ' td-year-start' : '');
       const parts = Render.dateParts(e.date);
 
@@ -211,7 +222,9 @@ const Render = {
           <span class="date-block" aria-hidden="true"><span class="date-block-month">${Render.escapeHtml(parts.month)}</span><span class="date-block-day">${parts.day}</span><span class="date-block-dow">${Render.escapeHtml(parts.weekday)}</span></span>
           <div class="td-schedule-main">
             <span class="td-schedule-date visually-hidden">${Render.formatDate(e.date)}</span>
+            ${homeVisit ? '<span class="td-tag td-tag--home">Home visit</span>' : ''}
             <span class="td-schedule-activity">${Render.escapeHtml(e.activity)}</span>
+            ${homeVisit && e.status !== 'note' ? '<p class="td-schedule-remarks td-home-note">Not a regular Tuesday session: runs 8:00 AM–12:00 NN, and up to 5 parents can join. The Tuesday assembly details above don’t apply; meeting place to be confirmed.</p>' : ''}
             ${e.remarks ? `<p class="td-schedule-remarks">${Render.escapeHtml(e.remarks)}</p>` : ''}
           </div>
           <div class="td-schedule-status">${Render.statusBadge(e)}</div>

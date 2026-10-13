@@ -16,7 +16,7 @@
 const CONFIG = {
   // Replace with your deployed Apps Script Web App URL, e.g.:
   // "https://script.google.com/macros/s/XXXXXXXXXXXX/exec"
-  API_URL: 'https://script.google.com/macros/s/AKfycbzUmvkn-zgl4W9gpiv522UHT5vRCblZGvBvSq_QKPYLHOdr5EdCrMk4Kqy6n9eqRzrD/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbyLZKbqBHHC_NCp8X68_oyUFb6gudXUk_uzRU5xoQH5ecq4A3lGiHaZHi2-HQS6-mtY/exec',
 
   // Shared key sent as ?k=... — must match Script Property HUB_KEY in Apps
   // Script (and HUB_KEY in td-companion.js). Anyone can read it in the

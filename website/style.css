@@ -1933,3 +1933,27 @@ button {
 .td-info-row dt{font-size:.8rem;opacity:.7;margin:0}
 .td-info-row dd{margin:2px 0 0;font-size:1rem;font-weight:500;line-height:1.35}
 .td-info-row--key dd{font-family:"Newsreader",Georgia,serif;font-size:1.35rem;font-weight:600;color:var(--accent-text)}
+
+/* Home-visit rows on the TD Companion schedule (not a Tuesday session). */
+.td-tag {
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.td-tag--home {
+  background: #fff1d6;
+  color: #7a4b00;
+  border: 1px solid #e8b65c;
+}
+[data-theme="dark"] .td-tag--home {
+  background: #3a2a0a;
+  color: #ffd58a;
+  border-color: #8a6420;
+}
+.td-schedule-item.is-home-visit .td-schedule-main { display: flex; flex-direction: column; align-items: flex-start; }
+.td-home-note { font-style: italic; }

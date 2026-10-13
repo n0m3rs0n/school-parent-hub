@@ -666,18 +666,22 @@ function handleTdSignup_(body) {
     const contactCol = header.findIndex(function (h) { return /contact|phone|mobile|cell|number|no\./.test(h); });
 
     const tz = Session.getScriptTimeZone();
+    // A date can have several slot rows (e.g. a home visit with up to 5
+    // parents). Use the first row for that date whose companion cell is
+    // still OPEN; answer 'taken' only when the date exists but none are.
+    // Reads the live cells (not the cache), under the lock, so two parents
+    // can't both win the same slot.
     let rowIndex = -1;
+    let dateFound = false;
     for (let r = headerIndex + 1; r < values.length; r++) {
       const d = toDate_(values[r][0], display[r][0]);
       if (!d) break;
-      if (Utilities.formatDate(d, tz, 'yyyy-MM-dd') === date) { rowIndex = r; break; }
+      if (Utilities.formatDate(d, tz, 'yyyy-MM-dd') !== date) continue;
+      dateFound = true;
+      if (String(display[r][companionCol]).trim().toUpperCase() === 'OPEN') { rowIndex = r; break; }
     }
-    if (rowIndex === -1) return { ok: false, error: 'not_found' };
-
-    // Re-read the live cell (not the cache) so two parents can't both win.
-    if (String(display[rowIndex][companionCol]).trim().toUpperCase() !== 'OPEN') {
-      return { ok: false, error: 'taken' };
-    }
+    if (!dateFound) return { ok: false, error: 'not_found' };
+    if (rowIndex === -1) return { ok: false, error: 'taken' };
 
     sheet.getRange(rowIndex + 1, companionCol + 1).setValue(name);
     let wroteContact = false;
