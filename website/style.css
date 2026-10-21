@@ -1989,7 +1989,48 @@ button {
 .news-caption {
   margin-top: var(--s-2);
   font-size: 0.8125rem;
+  font-style: italic;
+  line-height: 1.45;
   color: var(--text-muted);
+}
+
+.news-credit {
+  font-style: normal;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.news-dateline {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.news-excerpt {
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+.news-inline-figure {
+  margin: var(--s-2) auto var(--s-5, 1.5rem);
+  max-width: 22rem;
+}
+
+.news-inline-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.news-gallery-item {
+  margin: 0;
+  min-width: 0;
+}
+
+.news-gallery-item .news-caption {
+  font-size: 0.75rem;
 }
 
 .news-article .card-date {
@@ -2043,7 +2084,8 @@ button {
 .news-gallery {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--s-2);
+  gap: var(--s-4) var(--s-3);
+  align-items: start;
 }
 
 @media (min-width: 640px) {

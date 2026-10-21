@@ -12,29 +12,40 @@ const NEWS_ARTICLES = [
   {
     id: 'class-retreat-2026',
     date: '2026-10-21',              // date posted (YYYY-MM-DD)
-    title: 'Letters, Candlelight and Quiet Prayer: Our 11-Escribano Class Retreat',
-    author: 'Posted by Nom & Kat, Class Parent Reps',
+    title: "Letters, Candlelight and a Parents’ Promise: 11-Escribano Closes Ignatian Retreat",
+    deck: "Over two days of silence, prayer and reflection, the Grade 11 class stepped away from routine. On Friday, their parents joined them to share stories of faith, love and the work still unfolding in their children.",
+    author: 'By Nom & Kat Hernandez, Class Parent Reps',
+    dateline: 'QUEZON CITY',
+    photoCredit: 'Photo: 11-Escribano Parents',
     image: 'news/2026-10-retreat-class-cover.jpg',
     imageAlt: 'The 11-Escribano class with their retreat lanyards, gathered in a bright chapel',
-    caption: 'The 11-Escribano class together in the chapel.',
-    excerpt: 'On October 15\u201316, our kids set aside classes and screens for their Ignatian Class Retreat at the Sacred Heart Novitiate in Novaliches: two days of letters, candlelit reflection, clay, quiet prayer and rest.',
+    caption: "The Grade 11 Escribano class gathers in the chapel during its Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House in Novaliches, Quezon City, October 15–16, 2026.",
+    excerpt: "Over two days of silence, prayer and reflection, the Grade 11 class stepped away from routine. On Friday, their parents joined them to share stories of faith, love and the work still unfolding in their children.",
+    // Body: strings are paragraphs; { photo: { src, alt, caption } } places an inline photo.
     body: [
-      'Dear fellow 11-Escribano parents,',
-      'Last Thursday and Friday, October 15\u201316, our children stepped away from their usual school routine for their Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House along Quirino Highway in Novaliches, Quezon City. Rooted in the spirituality of St. Ignatius of Loyola, the retreat is a required formation experience for every ASHS student, a time for prayer, reflection, and discernment.',
-      'The retreat opened with a Send-off Mass on Thursday morning at the St. Aloysius Gonzaga Chapel on campus. Throughout the two days, the class was accompanied by Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol, together with our Class Moderator, Ms. Lumasang. Thank you for guiding our kids and keeping them safe.',
-      'The photos tell a lovely story. Our kids sat with letters written for them, some curled up on a sofa, others in a quiet corner of the hall. As evening fell, they journaled and reflected by candlelight. They shaped small figures from modeling clay, spent unhurried moments in quiet prayer in the chapel, and rested outdoors under the big trees.',
-      'On Friday morning, we parents joined them at the retreat house for the Parents\u2019 Session, followed by the Retreat Closing Mass and a lunch salu-salo together. Thank you to everyone who came, and to all who prayed from wherever they were.',
-      'If your child came home with stories to share, or just a little quieter, take the chance to listen. Campus Ministry\u2019s hope is that each child grows in \u201ca deeper awareness and relationship with himself, others, and God,\u201d and that is something we can keep nurturing at home.',
-      'Thank you for being such a supportive class community!'
+      "Parents of the Grade 11 Escribano class gathered at the Sacred Heart Novitiate & Retreat House in Novaliches on Friday, October 16, to share heartfelt stories about their children. The Parents’ Session was the emotional high point of the class’s two-day Ignatian Class Retreat.",
+      "The October 15–16 retreat, held at the retreat house along KM 23 Quirino Highway, is rooted in the spirituality of St. Ignatius of Loyola and sets aside time for prayer, reflection and discernment. Campus Ministry describes its aim as helping each student grow in “a deeper awareness and relationship with himself, others, and God.”",
+      "Two parents spoke at the lectern during Friday’s session.",
+      {"photo": {"src": "news/2026-10-retreat-claudine-sharing.jpg", "alt": "Claudine de Leon speaking at the lectern", "caption": "Claudine de Leon, mother of Tyrone, speaks about planting seeds of faith during the Parents’ Session on Friday, October 16."}},
+      "Claudine de Leon, mother of Tyrone, spoke about planting seeds of faith in a child, trusting that what parents sow at home will continue to grow.",
+      {"photo": {"src": "news/2026-10-retreat-nomerson-sharing.jpg", "alt": "Nomerson Hernandez speaking at the lectern", "caption": "Nomerson Hernandez, father of Theon, shares about his mission as a parent, drawing on Philippians 1:6, at the Parents’ Session."}},
+      "Nomerson Hernandez, father of Theon, built his sharing around a question he used to ask his son. When Theon was three and his younger sister Kala was born, Hernandez asked him every time he left for work: “Theon, what is your mission?” The boy always answered, “To protect Kala and Mommy.”",
+      "“Looking back, I realize that while I was teaching him about his mission, God was also teaching me about mine,” Hernandez said. As his son nears adulthood, he said, strengthening Theon’s faith also means trusting God more.",
+      "“I can guide him. I can listen to him. I can pray for him. But I cannot walk every step of his journey for him,” he said.",
+      "Both sharers anchored their reflections in the same verse, Philippians 1:6: “being confident of this, that he who began a good work in you will carry it on to completion until the day of Christ Jesus” (New International Version). The verse captured the morning’s theme: formation does not end with a retreat, but is a work in progress that parents, teachers and God share.",
+      "The session was followed by the Retreat Closing Mass and a lunch salu-salo where families and students ate together.",
+      "The retreat began Thursday morning with a Send-off Mass at the St. Aloysius Gonzaga Chapel on campus. Throughout the two days, the class was accompanied by Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol and Class Moderator Ms. Eirenne Lamasang.",
+      "Away from classes and screens, the students read letters written for them, journaled by candlelight, worked with modeling clay and prayed in silence in the chapel. Between sessions, they rested under the retreat house’s big trees.",
+      "The class parents thank the Campus Ministry team and Ms. Eirenne Lamasang for guiding the students and keeping them safe. They also thank every family who joined on Friday or prayed from wherever they were."
     ],
     galleryLink: 'https://drive.google.com/drive/folders/1cOwicW5Cf2hipfnuIA7gEP1kgMuC-oax',
     gallery: [
-      { src: 'news/2026-10-retreat-letters-sofa.jpg', alt: 'Boys on a sofa reading letters', caption: 'Letters on the sofa' },
-      { src: 'news/2026-10-retreat-letters-hall.jpg', alt: 'Students quietly reading letters around a hall', caption: 'Quiet corners all around the hall' },
-      { src: 'news/2026-10-retreat-journaling-candle.jpg', alt: 'A student journaling by candlelight', caption: 'Journaling by candlelight' },
-      { src: 'news/2026-10-retreat-clay-modeling.jpg', alt: 'Students in green class shirts sculpting with modeling clay', caption: 'Creating with modeling clay' },
-      { src: 'news/2026-10-retreat-chapel-prayer.jpg', alt: 'Two students praying quietly in the chapel', caption: 'Quiet prayer in the chapel' },
-      { src: 'news/2026-10-retreat-grounds-rest.jpg', alt: 'Students resting on a swing and bench under big trees', caption: 'Rest under the trees' }
+      { src: 'news/2026-10-retreat-letters-sofa.jpg', alt: "Boys on a sofa reading letters", caption: "Students settle onto a sofa to read letters written for them." },
+      { src: 'news/2026-10-retreat-letters-hall.jpg', alt: "Students quietly reading letters around a hall", caption: "Students find quiet corners around the hall to read their letters in silence." },
+      { src: 'news/2026-10-retreat-journaling-candle.jpg', alt: "A student journaling by candlelight", caption: "A student writes in his journal by candlelight during an evening reflection." },
+      { src: 'news/2026-10-retreat-clay-modeling.jpg', alt: "Students in green class shirts sculpting with modeling clay", caption: "Students in green class shirts work with modeling clay as part of a reflection activity." },
+      { src: 'news/2026-10-retreat-chapel-prayer.jpg', alt: "Two students praying quietly in the chapel", caption: "Two students pray quietly in the retreat house chapel." },
+      { src: 'news/2026-10-retreat-grounds-rest.jpg', alt: "Students resting on a swing and bench under big trees", caption: "Students rest on a swing and bench under the big trees on the retreat house grounds." }
     ]
   }
 ];
@@ -49,6 +60,13 @@ const NEWS_ARTICLES = [
     if (cls) n.className = cls;
     if (text != null) n.textContent = text;
     return n;
+  };
+
+  // Newspaper-style caption: caption text followed by the photo credit.
+  const caption = function (text, credit) {
+    const c = el('figcaption', 'news-caption', text);
+    if (credit) { c.appendChild(document.createTextNode(' ')); c.appendChild(el('span', 'news-credit', credit)); }
+    return c;
   };
 
   const articles = NEWS_ARTICLES.slice().sort(function (a, b) { return b.date.localeCompare(a.date); });
@@ -66,7 +84,7 @@ const NEWS_ARTICLES = [
       const img = el('img', 'news-photo');
       img.src = a.image; img.alt = a.imageAlt || ''; img.loading = 'lazy'; img.decoding = 'async';
       fig.appendChild(img);
-      if (a.caption) fig.appendChild(el('figcaption', 'news-caption', a.caption));
+      if (a.caption) fig.appendChild(caption(a.caption, a.photoCredit));
       art.appendChild(fig);
     }
 
@@ -83,7 +101,20 @@ const NEWS_ARTICLES = [
     const body = el('div', 'news-body');
     body.id = a.id + '-body';
     body.hidden = true;
-    a.body.forEach(function (p) { body.appendChild(el('p', null, p)); });
+    a.body.forEach(function (p, i) {
+      if (p && p.photo) {
+        const f = el('figure', 'news-inline-figure');
+        const im = el('img', 'news-inline-photo');
+        im.src = p.photo.src; im.alt = p.photo.alt || ''; im.loading = 'lazy'; im.decoding = 'async';
+        f.appendChild(im);
+        if (p.photo.caption) f.appendChild(caption(p.photo.caption, a.photoCredit));
+        body.appendChild(f);
+        return;
+      }
+      const para = el('p', null, p);
+      if (i === 0 && a.dateline) para.insertBefore(el('span', 'news-dateline', a.dateline + ' \u2014 '), para.firstChild);
+      body.appendChild(para);
+    });
     if (a.gallery && a.gallery.length) {
       const grid = el('div', 'news-gallery');
       a.gallery.forEach(function (g) {
@@ -94,7 +125,10 @@ const NEWS_ARTICLES = [
         ti.src = g.src; ti.alt = g.alt || ''; ti.loading = 'lazy'; ti.decoding = 'async';
         b.appendChild(ti);
         b.addEventListener('click', function () { openLightbox(g); });
-        grid.appendChild(b);
+        const gf = el('figure', 'news-gallery-item');
+        gf.appendChild(b);
+        if (g.caption) gf.appendChild(caption(g.caption, a.photoCredit));
+        grid.appendChild(gf);
       });
       body.appendChild(el('h3', 'news-gallery-title', 'Photos from the retreat'));
       body.appendChild(grid);
@@ -115,7 +149,6 @@ const NEWS_ARTICLES = [
       body.hidden = !open;
       btn.setAttribute('aria-expanded', String(open));
       btn.textContent = open ? 'Show less' : 'Read the full story';
-      art.querySelector('.news-excerpt').hidden = open;
     });
     art.appendChild(btn);
     list.appendChild(art);
