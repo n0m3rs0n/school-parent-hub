@@ -27,7 +27,7 @@ const NEWS_ARTICLES = [
       'If your child came home with stories to share, or just a little quieter, take the chance to listen. Campus Ministry\u2019s hope is that each child grows in \u201ca deeper awareness and relationship with himself, others, and God,\u201d and that is something we can keep nurturing at home.',
       'Thank you for being such a supportive class community!'
     ],
-    galleryLink: 'https://drive.google.com/drive/folders/1DQsdX5IlKtU8VDbm_nEeu0F7Mkw-0X5y',
+    galleryLink: 'https://drive.google.com/drive/folders/1cOwicW5Cf2hipfnuIA7gEP1kgMuC-oax',
     gallery: [
       { src: 'news/2026-10-retreat-letters-sofa.jpg', alt: 'Boys on a sofa reading letters', caption: 'Letters on the sofa' },
       { src: 'news/2026-10-retreat-letters-hall.jpg', alt: 'Students quietly reading letters around a hall', caption: 'Quiet corners all around the hall' },
