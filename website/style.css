@@ -1957,3 +1957,78 @@ button {
 }
 .td-schedule-item.is-home-visit .td-schedule-main { display: flex; flex-direction: column; align-items: flex-start; }
 .td-home-note { font-style: italic; }
+
+/* ---------- Class News ---------- */
+.news-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.news-article {
+  padding: 0 0 var(--s-6);
+  margin-bottom: var(--s-6);
+  border-bottom: 1px solid var(--rule);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.news-figure {
+  margin: 0 0 var(--s-4);
+}
+
+.news-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.news-caption {
+  margin-top: var(--s-2);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.news-article .card-date {
+  display: block;
+}
+
+.news-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.news-title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.news-title a:hover {
+  text-decoration: underline;
+}
+
+.news-byline {
+  margin: var(--s-2) 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.news-body {
+  margin-top: var(--s-4);
+  max-width: 40em;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+.news-body p {
+  margin: 0 0 var(--s-4);
+}
+
+.news-toggle {
+  padding-left: 0;
+}
