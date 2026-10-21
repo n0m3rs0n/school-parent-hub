@@ -2098,3 +2098,20 @@ button {
   line-height: 1;
   cursor: pointer;
 }
+
+.news-all-photos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: var(--s-4);
+  padding: 0 var(--s-5);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.news-all-photos::after { content: ' \2197'; margin-left: 6px; }
+.news-all-photos:hover { filter: brightness(1.1); }

@@ -20,24 +20,21 @@ const NEWS_ARTICLES = [
     excerpt: 'On October 15\u201316, our kids set aside classes and screens for their Ignatian Class Retreat at the Sacred Heart Novitiate in Novaliches: two days of letters, candlelit reflection, clay, quiet prayer and rest.',
     body: [
       'Dear fellow 11-Escribano parents,',
-      'Last Thursday and Friday, October 15\u201316, our children stepped away from their usual school routine for their Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House along Quirino Highway in Novaliches, Quezon City. Rooted in the spirituality of St. Ignatius of Loyola, the retreat is a required formation experience for every ASHS student, a dedicated time for prayer, reflection, and discernment.',
-      'The two days began with a Send-off Mass at 7:50 AM on Thursday at the St. Aloysius Gonzaga Chapel on campus. Throughout the retreat, the class was accompanied by Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol, together with our Class Moderator, Ms. Lumasang. Thank you for guiding our kids and keeping them safe.',
-      'The photos tell a lovely story. Our kids sat with letters written for them, some curled up on a sofa, others finding a quiet corner of the hall. As evening fell, they journaled and reflected by candlelight. In a creative session, they shaped small figures out of modeling clay. There were also unhurried moments of quiet prayer in the chapel and time to rest outdoors on a swing and bench under the big trees.',
-      'On Friday morning, we parents were invited to the retreat house for a Parents\u2019 Session at 9:30 AM, followed by the Retreat Closing Mass at 11:00 AM and a lunch salu-salo at noon. Thank you to everyone who joined us, and to all who prayed from wherever they were.',
-      'If your child came home with stories to share, or just a little quieter, take the chance to listen. Campus Ministry\u2019s hope is that each child develops \u201ca deeper awareness and relationship with himself, others, and God,\u201d and that is something we can keep nurturing at home.',
+      'Last Thursday and Friday, October 15\u201316, our children stepped away from their usual school routine for their Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House along Quirino Highway in Novaliches, Quezon City. Rooted in the spirituality of St. Ignatius of Loyola, the retreat is a required formation experience for every ASHS student, a time for prayer, reflection, and discernment.',
+      'The retreat opened with a Send-off Mass on Thursday morning at the St. Aloysius Gonzaga Chapel on campus. Throughout the two days, the class was accompanied by Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol, together with our Class Moderator, Ms. Lumasang. Thank you for guiding our kids and keeping them safe.',
+      'The photos tell a lovely story. Our kids sat with letters written for them, some curled up on a sofa, others in a quiet corner of the hall. As evening fell, they journaled and reflected by candlelight. They shaped small figures from modeling clay, spent unhurried moments in quiet prayer in the chapel, and rested outdoors under the big trees.',
+      'On Friday morning, we parents joined them at the retreat house for the Parents\u2019 Session, followed by the Retreat Closing Mass and a lunch salu-salo together. Thank you to everyone who came, and to all who prayed from wherever they were.',
+      'If your child came home with stories to share, or just a little quieter, take the chance to listen. Campus Ministry\u2019s hope is that each child grows in \u201ca deeper awareness and relationship with himself, others, and God,\u201d and that is something we can keep nurturing at home.',
       'Thank you for being such a supportive class community!'
     ],
+    galleryLink: 'https://drive.google.com/drive/folders/1DQsdX5IlKtU8VDbm_nEeu0F7Mkw-0X5y',
     gallery: [
-      { src: 'news/2026-10-retreat-letters-moderator.jpg', alt: 'Students reading their letters with a moderator', caption: 'Reading letters, with a moderator nearby' },
       { src: 'news/2026-10-retreat-letters-sofa.jpg', alt: 'Boys on a sofa reading letters', caption: 'Letters on the sofa' },
       { src: 'news/2026-10-retreat-letters-hall.jpg', alt: 'Students quietly reading letters around a hall', caption: 'Quiet corners all around the hall' },
       { src: 'news/2026-10-retreat-journaling-candle.jpg', alt: 'A student journaling by candlelight', caption: 'Journaling by candlelight' },
-      { src: 'news/2026-10-retreat-candlelit-reflection.jpg', alt: 'Candlelit reflection session in the hall', caption: 'Candlelit reflection' },
       { src: 'news/2026-10-retreat-clay-modeling.jpg', alt: 'Students in green class shirts sculpting with modeling clay', caption: 'Creating with modeling clay' },
-      { src: 'news/2026-10-retreat-clay-figure.jpg', alt: 'Close-up of a small clay figure being shaped', caption: 'A clay figure takes shape' },
       { src: 'news/2026-10-retreat-chapel-prayer.jpg', alt: 'Two students praying quietly in the chapel', caption: 'Quiet prayer in the chapel' },
-      { src: 'news/2026-10-retreat-grounds-rest.jpg', alt: 'Students resting on a swing and bench under big trees', caption: 'Rest under the trees' },
-      { src: 'news/2026-10-class-retreat.jpg', alt: 'The class smiling together in a wood-panelled chapel', caption: 'One more class photo' }
+      { src: 'news/2026-10-retreat-grounds-rest.jpg', alt: 'Students resting on a swing and bench under big trees', caption: 'Rest under the trees' }
     ]
   }
 ];
@@ -101,6 +98,11 @@ const NEWS_ARTICLES = [
       });
       body.appendChild(el('h3', 'news-gallery-title', 'Photos from the retreat'));
       body.appendChild(grid);
+    }
+    if (a.galleryLink) {
+      const more = el('a', 'news-all-photos', 'See all photos');
+      more.href = a.galleryLink; more.target = '_blank'; more.rel = 'noopener noreferrer';
+      body.appendChild(more);
     }
     art.appendChild(body);
 
