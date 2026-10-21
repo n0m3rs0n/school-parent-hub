@@ -12,20 +12,32 @@ const NEWS_ARTICLES = [
   {
     id: 'class-retreat-2026',
     date: '2026-10-21',              // date posted (YYYY-MM-DD)
-    title: 'Two Days of Prayer and Reflection: Our 11-Escribano Class Retreat',
+    title: 'Letters, Candlelight and Quiet Prayer: Our 11-Escribano Class Retreat',
     author: 'Posted by Nom & Kat, Class Parent Reps',
-    image: 'news/2026-10-class-retreat.jpg',
-    imageAlt: 'The 11-Escribano class smiling together inside a wood-panelled chapel',
+    image: 'news/2026-10-retreat-class-cover.jpg',
+    imageAlt: 'The 11-Escribano class with their retreat lanyards, gathered in a bright chapel',
     caption: 'The 11-Escribano class together in the chapel.',
-    excerpt: 'On October 15–16, our kids set aside classes and screens for their Ignatian Class Retreat at the Sacred Heart Novitiate in Novaliches. Here is a look back at those two days.',
+    excerpt: 'On October 15\u201316, our kids set aside classes and screens for their Ignatian Class Retreat at the Sacred Heart Novitiate in Novaliches: two days of letters, candlelit reflection, clay, quiet prayer and rest.',
     body: [
       'Dear fellow 11-Escribano parents,',
-      'Last Thursday and Friday, October 15–16, our children stepped away from their usual school routine for their Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House along Quirino Highway in Novaliches, Quezon City.',
-      'Rooted in the spirituality of St. Ignatius of Loyola, the retreat is a required formation experience for every ASHS student, a dedicated time for prayer, reflection, and discernment. In Campus Ministry\u2019s words, the hope is that each child develops \u201ca deeper awareness and relationship with himself, others, and God.\u201d',
-      'The two days began with a Send-off Mass at 7:50 AM on Thursday at the St. Aloysius Gonzaga Chapel on campus. From there, the class was accompanied throughout by the retreat team: Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol, together with our Class Moderator, Ms. Lumasang. Thank you for guiding our kids and keeping them safe.',
-      'On Friday morning, we parents were invited to the retreat house for a Parents\u2019 Session at 9:30 AM, followed by the Retreat Closing Mass at 11:00 AM and a lunch salu-salo at noon. Thank you to everyone who joined us, and to all who sent their prayers from wherever they were.',
-      'If your child came home a little quieter or with stories to share, take the chance to listen. These moments of reflection are a gift we can keep nurturing at home.',
-      'Thank you for being such a supportive class community. See you at the next gathering!'
+      'Last Thursday and Friday, October 15\u201316, our children stepped away from their usual school routine for their Ignatian Class Retreat at the Sacred Heart Novitiate & Retreat House along Quirino Highway in Novaliches, Quezon City. Rooted in the spirituality of St. Ignatius of Loyola, the retreat is a required formation experience for every ASHS student, a dedicated time for prayer, reflection, and discernment.',
+      'The two days began with a Send-off Mass at 7:50 AM on Thursday at the St. Aloysius Gonzaga Chapel on campus. Throughout the retreat, the class was accompanied by Campus Ministers Mr. Nigel Perea and Mr. Kent Sarcol, together with our Class Moderator, Ms. Lumasang. Thank you for guiding our kids and keeping them safe.',
+      'The photos tell a lovely story. Our kids sat with letters written for them, some curled up on a sofa, others finding a quiet corner of the hall. As evening fell, they journaled and reflected by candlelight. In a creative session, they shaped small figures out of modeling clay. There were also unhurried moments of quiet prayer in the chapel and time to rest outdoors on a swing and bench under the big trees.',
+      'On Friday morning, we parents were invited to the retreat house for a Parents\u2019 Session at 9:30 AM, followed by the Retreat Closing Mass at 11:00 AM and a lunch salu-salo at noon. Thank you to everyone who joined us, and to all who prayed from wherever they were.',
+      'If your child came home with stories to share, or just a little quieter, take the chance to listen. Campus Ministry\u2019s hope is that each child develops \u201ca deeper awareness and relationship with himself, others, and God,\u201d and that is something we can keep nurturing at home.',
+      'Thank you for being such a supportive class community!'
+    ],
+    gallery: [
+      { src: 'news/2026-10-retreat-letters-moderator.jpg', alt: 'Students reading their letters with a moderator', caption: 'Reading letters, with a moderator nearby' },
+      { src: 'news/2026-10-retreat-letters-sofa.jpg', alt: 'Boys on a sofa reading letters', caption: 'Letters on the sofa' },
+      { src: 'news/2026-10-retreat-letters-hall.jpg', alt: 'Students quietly reading letters around a hall', caption: 'Quiet corners all around the hall' },
+      { src: 'news/2026-10-retreat-journaling-candle.jpg', alt: 'A student journaling by candlelight', caption: 'Journaling by candlelight' },
+      { src: 'news/2026-10-retreat-candlelit-reflection.jpg', alt: 'Candlelit reflection session in the hall', caption: 'Candlelit reflection' },
+      { src: 'news/2026-10-retreat-clay-modeling.jpg', alt: 'Students in green class shirts sculpting with modeling clay', caption: 'Creating with modeling clay' },
+      { src: 'news/2026-10-retreat-clay-figure.jpg', alt: 'Close-up of a small clay figure being shaped', caption: 'A clay figure takes shape' },
+      { src: 'news/2026-10-retreat-chapel-prayer.jpg', alt: 'Two students praying quietly in the chapel', caption: 'Quiet prayer in the chapel' },
+      { src: 'news/2026-10-retreat-grounds-rest.jpg', alt: 'Students resting on a swing and bench under big trees', caption: 'Rest under the trees' },
+      { src: 'news/2026-10-class-retreat.jpg', alt: 'The class smiling together in a wood-panelled chapel', caption: 'One more class photo' }
     ]
   }
 ];
@@ -75,6 +87,21 @@ const NEWS_ARTICLES = [
     body.id = a.id + '-body';
     body.hidden = true;
     a.body.forEach(function (p) { body.appendChild(el('p', null, p)); });
+    if (a.gallery && a.gallery.length) {
+      const grid = el('div', 'news-gallery');
+      a.gallery.forEach(function (g) {
+        const b = el('button', 'news-thumb');
+        b.type = 'button';
+        b.setAttribute('aria-label', 'View photo: ' + (g.caption || g.alt));
+        const ti = el('img');
+        ti.src = g.src; ti.alt = g.alt || ''; ti.loading = 'lazy'; ti.decoding = 'async';
+        b.appendChild(ti);
+        b.addEventListener('click', function () { openLightbox(g); });
+        grid.appendChild(b);
+      });
+      body.appendChild(el('h3', 'news-gallery-title', 'Photos from the retreat'));
+      body.appendChild(grid);
+    }
     art.appendChild(body);
 
     const btn = el('button', 'read-more-btn news-toggle', 'Read the full story');
@@ -91,6 +118,21 @@ const NEWS_ARTICLES = [
     art.appendChild(btn);
     list.appendChild(art);
   });
+
+  // Simple lightbox using <dialog>; closes on click, Esc, or the button.
+  let box;
+  function openLightbox(g) {
+    if (!box) {
+      box = el('dialog', 'news-lightbox');
+      box.innerHTML = '<button type="button" class="news-lightbox-close" aria-label="Close photo">\u00d7</button><img alt=""><p class="news-caption"></p>';
+      box.addEventListener('click', function () { box.close(); });
+      document.body.appendChild(box);
+    }
+    box.querySelector('img').src = g.src;
+    box.querySelector('img').alt = g.alt || '';
+    box.querySelector('p').textContent = g.caption || '';
+    box.showModal();
+  }
 
   // Deep link (news.html#id) opens that article.
   const target = location.hash && document.getElementById(location.hash.slice(1));
